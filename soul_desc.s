@@ -32,14 +32,6 @@
 @30 MOTOR1_SPEED[4] Saida
 @31 MOTOR1_SPEED[5] Saida
 @
-@- Configurar o TZIC
-@  .set TZIC_BASE,             0x0FFFC000
-@  .set TZIC_INTCTRL,          0x0
-@  .set TZIC_INTSEC1,          0x84 
-@  .set TZIC_ENSET1,           0x104
-@  .set TZIC_PRIOMASK,         0xC
-@  .set TZIC_PRIORITY9,        0x424
-@
 @- Configurar GPT (Com tempo razoável)
 @  .set TIME_SZ,            0x00000010 @ decimal = 16 
 @  .set GPT_CR,             0x53FA0000
@@ -61,9 +53,6 @@ interrupt_vector:
 .org 0x08
     b SVC_HANDLER
 
-.org 0x100
-.text
-
 .set DATA_BASE_ADDR, 0x77801800 @ Parte da memoria destinada aos dados (definido no Makefile do projeto)
 
 @Configuracao de pilhas - cada uma tem 0x800 enderecos = 2KB
@@ -74,10 +63,31 @@ interrupt_vector:
 .set IRQ_STACK,        0x777FF800
 .set UNDEFINED_STACK,  0x777FF000
 
-@ Configurar GPIO (entradas e saidas)
+@ Configura enderecos GPIO (entradas e saidas)
 .set REG_DR,           0x53F84000     @Data Register
 .set REG_GDIR,         0x53F84004     @Direction Register (n-bit = 0 -> entrada, n-bit = 1 -> saida)
 .set REG_PSR,          0x53F84008     @Pad status register - apenas para leitura
+
+@Configuracao de mascaras para o GPIO
+.set MASK0             0b00000000000000000000000000000000
+
+@ Configura enderecos TZIC
+.set TZIC_BASE,        0x0FFFC000
+.set TZIC_INTCTRL,     0x0
+.set TZIC_INTSEC1,     0x84 
+.set TZIC_ENSET1,      0x104
+.set TZIC_PRIOMASK,    0xC
+.set TZIC_PRIORITY9,   0x424
+
+@ Configura enderecos GPT
+.set GPT_CR,                0x53FA0000
+.set GPT_PR,                0x53FA0004
+.set GPT_SR,                0x53FA0008
+.set GPT_OCR1,              0x53FA0010
+.set GPT_IR,                0x53FA000C
+
+.org 0x100
+.text
 
 RESET_HANDLER:
     @Set interrupt table base address on coprocessor 15.
@@ -86,5 +96,6 @@ RESET_HANDLER:
 
     b SET_GPT @ pula para o bloco de codigo que configura o GPT (e logo depois ja confiugra o TZIC)
 
+SVC_HANDLER:
 
 .data
