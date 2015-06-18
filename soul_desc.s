@@ -165,12 +165,6 @@ SET_TZIC:
     str r0, [r1, #TZIC_INTCTRL]
 
 SET_STACKS:
-    msr CPSR_c, #0x13       @ SUPERVISOR mode, IRQ/FIQ enabled
-    ldr sp, =SUPERVISOR_STACK
-
-    msr CPSR_c, #0x13       @ SUPERVISOR mode, IRQ/FIQ enabled
-    ldr sp, =SUPERVISOR_STACK
-
 
     @instrucao msr - habilita interrupcoes
     msr CPSR_c, #0xDF       @ SYSTEM mode, IRQ/FIQ disabled
