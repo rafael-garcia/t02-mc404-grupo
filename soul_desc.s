@@ -69,7 +69,7 @@ interrupt_vector:
 .set REG_PSR,          0x53F84008     @Pad status register - apenas para leitura
 
 @Configuracao de mascaras para o GPIO
-.set MASK0             0b00000000000000000000000000000000
+.set MASK             0b00000000000000000000000000000000
 
 @ Configura enderecos TZIC
 .set TZIC_BASE,        0x0FFFC000
@@ -86,6 +86,13 @@ interrupt_vector:
 .set GPT_OCR1,              0x53FA0010
 .set GPT_IR,                0x53FA000C
 
+
+@ Configura frequencia para fazer a contagem (system time)
+.set TIME_SZ                100
+
+@ Configura valor de iteracoes para aguardar algo entre 10-15 ms
+.set LOOP_WAITING_VAL       15000
+
 .org 0x100
 .text
 
@@ -99,3 +106,4 @@ RESET_HANDLER:
 SVC_HANDLER:
 
 .data
+CONTADOR_TEMPO: .word 0
