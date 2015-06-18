@@ -86,6 +86,14 @@ interrupt_vector:
 .set GPT_OCR1,         0x53FA0010
 .set GPT_IR,           0x53FA000C
 
+@ Configura valores das syscalls
+.set ID_READ_SONAR,       08
+.set ID_SET_MOTOR_SPEED,  09
+.set ID_SET_MOTORS_SPEED, 10
+.set ID_GET_TIME,         11
+.set ID_SET_TIME,         12
+.set ID_SET_ALARM,        13
+
 @ Configura frequencia para fazer a contagem (system time)
 .set TIME_SZ,          100
 
@@ -179,6 +187,42 @@ SET_STACKS:
 
 
 SVC_HANDLER:
+    cmp r7, ID_READ_SONAR
+    beq READ_SONAR
+
+    cmp r7, ID_SET_MOTOR_SPEED
+    beq SET_MOTOR_SPEED
+
+    cmp r7, ID_SET_MOTORS_SPEED
+    beq SET_MOTORS_SPEED
+
+    cmp r7, ID_GET_TIME
+    beq GET_TIME
+
+    cmp r7, ID_SET_TIME
+    beq SET_TIME
+
+    cmp r7, ID_SET_ALARM
+    beq SET_ALARM
+
+READ_SONAR:
+SET_MOTOR_SPEED:
+SET_MOTORS_SPEED:
+GET_TIME:
+SET_TIME:
+SET_ALARM:
+
+@ funcao que faz LOOP_WAITING_VAL iteracoes para alcancar um delay desejavel de 10-15ms
+LOOP_WAITING:
+    mov r0, #0
+    ldr r1, =LOOP_WAITING_VAL
+
+    do:
+      add r0, r0, #1
+      cmp r0, r1
+      ble do
+    mov pc, lr
+
 
 .data
   CONTADOR_TEMPO: .word 0
