@@ -61,7 +61,7 @@ interrupt_vector:
 .set REG_PSR,          0x53F84008     @Pad status register - apenas para leitura
 
 @Configuracao de mascaras para o GPIO
-.set MASK             0b00000000000000000000000000000000
+.set MASK_GDIR         0b11111111111111000000000000111110
 
 @ Configura enderecos TZIC
 .set TZIC_BASE,        0x0FFFC000
