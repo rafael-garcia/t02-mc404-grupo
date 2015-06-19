@@ -221,20 +221,19 @@ SET_MOTORS_SPEED:
     bgt fim_set_motors
 
 
-    mov r0, r0, LSL #19 @ move o sexto bit ate o 24 bit
-    ldr r2, =MASK_MOTORS
-    and r2, r2, r0
+    mov r0, r0, LSL #19  @ move o sexto bit ate o 24 bit
+    ldr r2, =MASK_MOTORS @ carrega a mascara que aceita ambos os motores
+    and r2, r2, r0       @ combina o valor do motor 2 ja deslocado com a mascara
 
-    mov r1, r1, LSL #26 @ move o sexto bit ate o 32 bit
-    and r2, r2, r1
+    mov r1, r1, LSL #26  @ move o sexto bit ate o 32 bit
+    and r2, r2, r1       @ combina o valor do motor 1 ja deslocado com a mascara
 
-    ldr r3, =REG_DR
-    ldr r3, [r3]
-    and r2, r2, r3
-    ldr r3, =REG_DR
-    str r2, [r3]
+    ldr r0, =REG_DR      @ carrega o endereco de DR
+    ldr r3, [r0]         @ carrega o valor de DR
+    and r2, r2, r3       @ combina os valores ja pre combinados de ambos os motores com o de DR
+    str r2, [r0]         @ guarda o novo valor no endereco correspondente a DR
 
-    mov r0, 0 @ velocidade ok
+    mov r0, #0 @ velocidade ok
 
     fim_set_motors:
       ldmfd sp!, {pc}
