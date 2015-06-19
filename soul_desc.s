@@ -61,7 +61,7 @@ interrupt_vector:
 .set REG_PSR,          0x53F84008     @Pad status register - apenas para leitura
 
 @ Configuracao de mascaras para o GPIO
-.set MASK_GDIR,                  0b11111111111111000000000000111110
+.set MASK_GDIR,                  0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
 .set MASK_MOTOR_0,               0b11111110000000111111111111111111
 .set MASK_MOTOR_1,               0b00000001111111111111111111111111
 .set MASK_MOTORS,                0b00000000000000111111111111111111
@@ -96,6 +96,10 @@ interrupt_vector:
 
 @ Configura frequencia para fazer a contagem (system time)
 .set TIME_SZ,          100
+
+
+@ Configura valor maximo de velocidade (sao 6 bits = 0b111111 = #63)
+.set MAX_SPEED_MOTOR   63
 
 @ Configura valor de iteracoes para aguardar algo entre 10-15 ms
 .set LOOP_WAITING_VAL  15000
@@ -181,29 +185,54 @@ SET_STACKS:
 
 
 SVC_HANDLER:
-    cmp r7, ID_READ_SONAR
+    cmp r7, #ID_READ_SONAR
     beq READ_SONAR
 
-    cmp r7, ID_SET_MOTOR_SPEED
+    cmp r7, #ID_SET_MOTOR_SPEED
     beq SET_MOTOR_SPEED
 
-    cmp r7, ID_SET_MOTORS_SPEED
+    cmp r7, #ID_SET_MOTORS_SPEED
     beq SET_MOTORS_SPEED
 
-    cmp r7, ID_GET_TIME
+    cmp r7, #ID_GET_TIME
     beq GET_TIME
 
-    cmp r7, ID_SET_TIME
+    cmp r7, #ID_SET_TIME
     beq SET_TIME
 
-    cmp r7, ID_SET_ALARM
+    cmp r7, #ID_SET_ALARM
     beq SET_ALARM
 
 READ_SONAR:
+    mov pc, lr
+
 SET_MOTOR_SPEED:
+    mov pc, lr
+
 SET_MOTORS_SPEED:
+    cmp r0, #MAX_SPEED_MOTOR
+    movgt r0, #-1
+    bgt fim_set_motors
+
+    cmp r1, #MAX_SPEED_MOTOR
+    movgt r0, #-2
+    bgt fim_set_motors
+
+    mov r0, 0 @ velocidade ok
+
+    fim_set_motors:
+      mov pc, lr
+
 GET_TIME:
+    ldr r1, =CONTADOR_TEMPO
+    ldr r0, [r1]
+    mov pc, lr
+
 SET_TIME:
+    ldr r1, =CONTADOR_TEMPO
+    str r0, [r1]
+    mov pc, lr
+
 SET_ALARM:
 
 @ funcao que faz LOOP_WAITING_VAL iteracoes para alcancar um delay desejavel de 10-15ms
