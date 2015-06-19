@@ -208,7 +208,46 @@ READ_SONAR:
     mov pc, lr
 
 SET_MOTOR_SPEED:
-    mov pc, lr
+    stmfd sp!, {lr}
+    cmp r0, #MAX_SPEED_MOTOR
+    movgt r0, #-1
+    bgt fim_set_motor
+
+    cmp r0, #0
+    beq set_motor_0
+    cmp r0, #1
+    beq set_motor_1
+    mov r0, #-2
+    b fim_set_motor
+
+    set_motor_0:
+        mov r0, r0, LSL #19     @ move o sexto bit ate o 24 bit
+        ldr r2, =MASK_MOTOR_0   @ carrega a mascara que aceita o motor 0
+        and r2, r2, r0          @ combina o valor do motor 0 ja deslocado com a mascara
+
+        ldr r0, =REG_DR         @ carrega o endereco de DR
+        ldr r3, [r0]            @ carrega o valor de DR
+        and r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
+        str r2, [r0]            @ guarda do novo valor no endereco correspondente a DR
+
+        mov r0, #0              @ velocidade motor 0 OK
+        b fim_set_motor
+
+    set_motor_1:
+        mov r0, r0, LSL #26     @ move o sexto bit ate o 32 bit
+        ldr r2, =MASK_MOTOR_1   @ carrega a mascara que aceita o motor 0
+        and r2, r2, r0          @ combina o valor do motor 1 ja deslocado com a mascara
+
+        ldr r0, =REG_DR         @ carrega o endereco de DR
+        ldr r3, [r0]            @ carrega o valor de DR
+        and r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
+        str r2, [r0]            @ guarda do novo valor no endereco correspondente a DR
+
+        mov r0, #0              @ velocidade motor 1 OK
+        b fim_set_motor
+
+    fim_set_motor:
+        ldmfd sp!, {pc}
 
 SET_MOTORS_SPEED:
     stmfd sp!, {lr}
@@ -223,7 +262,7 @@ SET_MOTORS_SPEED:
 
     mov r0, r0, LSL #19  @ move o sexto bit ate o 24 bit
     ldr r2, =MASK_MOTORS @ carrega a mascara que aceita ambos os motores
-    and r2, r2, r0       @ combina o valor do motor 2 ja deslocado com a mascara
+    and r2, r2, r0       @ combina o valor do motor 0 ja deslocado com a mascara
 
     mov r1, r1, LSL #26  @ move o sexto bit ate o 32 bit
     and r2, r2, r1       @ combina o valor do motor 1 ja deslocado com a mascara
