@@ -205,7 +205,8 @@ SVC_HANDLER:
     beq SET_ALARM
 
 READ_SONAR:
-    mov pc, lr
+    stmfd sp!, {lr}
+    ldmfd sp!, {pc}
 
 SET_MOTOR_SPEED:
     stmfd sp!, {lr}
