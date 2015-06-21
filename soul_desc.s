@@ -29,14 +29,17 @@ interrupt_vector:
 @ Configuracao de mascaras para o GPIO
 .set MASK_GDIR,                  0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
 
-.set MASK_MOTOR_0,               0b11111110000000111111111111111111 @ 7 bits(18:24) = 1+6 bits = write + speed[0:5]
-.set MASK_MOTOR_1,               0b00000001111111111111111111111111 @ MSB 7 bits = 1+6 bits = write + speed[0:5]
-.set MASK_MOTORS,                0b00000000000000111111111111111111 @ MSB 14 bits = 1+6 bits para cada motor
-.set MASK_SONAR_MUX,             0b11111111111111111111111111000001
-.set MASK_SIG_HIGH_TRIGGER,      0b00000000000000000000000000000010
-.set MASK_SIG_LOW_TRIGGER,       0b11111111111111111111111111111101
-.set MASK_FLAG,                  0b00000000000000000000000000000001
-.set MASK_SONAR_DATA,            0b00000000000000111111111111000000
+.set MASK_MOTOR_0,                0b00000001111110000000000000000000 @ 7 bits(18:24) = 1+6 bits = write + speed[0:5]
+.set MASK_MOTOR_0_WRITE,          0b00000000000001000000000000000000
+.set MASK_MOTOR_1,                0b11111100000000000000000000000000 @ MSB 7 bits = 1+6 bits = write + speed[0:5]
+.set MASK_MOTOR_1_WRITE,          0b00000010000000000000000000000000
+.set MASK_MOTORS,                 0b11111101111110000000000000000000 @ MSB 14 bits = 1+6 bits para cada motor
+.set MASK_MOTORS_WRITE,           0b00000010000001000000000000000000
+.set MASK_SONAR_MUX,              0b00000000000000000000000000111110
+.set MASK_SIG_HIGH_TRIGGER,       0b00000000000000000000000000000010
+.set MASK_SIG_LOW_TRIGGER,        0b11111111111111111111111111111101
+.set MASK_FLAG,                   0b00000000000000000000000000000001
+.set MASK_SONAR_DATA,             0b00000000000000111111111111000000
 
 @ Configura enderecos TZIC
 .set TZIC_BASE,        0x0FFFC000
@@ -172,6 +175,20 @@ SVC_HANDLER:
 
 READ_SONAR:
     stmfd sp!, {lr}
+
+    cmp r0, #15         @ Verifica se o sonar escolhido é válido
+    bhi err_sonar_id
+
+    mov r1, =REG_DR     @ Carrega o valor do registrador DR
+    ldr r2, [r1]
+
+
+
+
+
+
+    err_sonar_id:
+        mov r0, #-1
     
     ldmfd sp!, {lr}
     movs pc, lr
@@ -232,14 +249,18 @@ SET_MOTORS_SPEED:
 
     mov r0, r0, LSL #19  @ move o sexto bit ate o 24 bit
     ldr r2, =MASK_MOTORS @ carrega a mascara que aceita ambos os motores
-    and r2, r2, r0       @ combina o valor do motor 0 ja deslocado com a mascara
+    and r3, r2, r0       @ combina o valor do motor 0 ja deslocado com a mascara
 
     mov r1, r1, LSL #26  @ move o sexto bit ate o 32 bit
     and r2, r2, r1       @ combina o valor do motor 1 ja deslocado com a mascara
 
+    orr r2, r2, r3       @ combina a velocidade dos dois motores
+    ldr r3, =MASK_MOTORS_WRITE
+    orr r2, r2, r3       @ combina com as flags de write
+
     ldr r0, =REG_DR      @ carrega o endereco de DR
     ldr r3, [r0]         @ carrega o valor de DR
-    and r2, r2, r3       @ combina os valores ja pre combinados de ambos os motores com o de DR
+    orr r2, r2, r3       @ combina os valores ja pre combinados de ambos os motores com o de DR
     str r2, [r0]         @ guarda o novo valor no endereco correspondente a DR
 
     mov r0, #0 @ velocidade ok
