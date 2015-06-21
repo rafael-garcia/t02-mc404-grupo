@@ -27,7 +27,7 @@ interrupt_vector:
 .set REG_PSR,          0x53F84008     @Pad status register - apenas para leitura
 
 @ Configuracao de mascaras para o GPIO
-.set MASK_GDIR,                  0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
+.set MASK_GDIR,                   0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
 
 .set MASK_MOTOR_0,                0b00000001111110000000000000000000 @ 7 bits(18:24) = 1+6 bits = write + speed[0:5]
 .set MASK_MOTOR_0_WRITE,          0b00000000000001000000000000000000
@@ -199,9 +199,9 @@ SET_MOTOR_SPEED:
     movgt r0, #-1
     bgt fim_set_motor
 
-    cmp r0, #0
+    cmp r1, #0
     beq set_motor_0
-    cmp r0, #1
+    cmp r1, #1
     beq set_motor_1
     mov r0, #-2
     b fim_set_motor
@@ -210,10 +210,12 @@ SET_MOTOR_SPEED:
         mov r0, r0, LSL #19     @ move o sexto bit ate o 24 bit
         ldr r2, =MASK_MOTOR_0   @ carrega a mascara que aceita o motor 0
         and r2, r2, r0          @ combina o valor do motor 0 ja deslocado com a mascara
+        ldr r1, =MASK_MOTOR_0_WRITE
+        orr r2, r2, r1          @ combina a velocidade com a flag write
 
         ldr r0, =REG_DR         @ carrega o endereco de DR
         ldr r3, [r0]            @ carrega o valor de DR
-        and r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
+        orr r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
         str r2, [r0]            @ guarda do novo valor no endereco correspondente a DR
 
         mov r0, #0              @ velocidade motor 0 OK
@@ -223,10 +225,12 @@ SET_MOTOR_SPEED:
         mov r0, r0, LSL #26     @ move o sexto bit ate o 32 bit
         ldr r2, =MASK_MOTOR_1   @ carrega a mascara que aceita o motor 0
         and r2, r2, r0          @ combina o valor do motor 1 ja deslocado com a mascara
+        ldr r1, =MASK_MOTOR_1_WRITE
+        orr r2, r2, r1          @ combina a velocidade com a flag write
 
         ldr r0, =REG_DR         @ carrega o endereco de DR
         ldr r3, [r0]            @ carrega o valor de DR
-        and r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
+        orr r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
         str r2, [r0]            @ guarda do novo valor no endereco correspondente a DR
 
         mov r0, #0              @ velocidade motor 1 OK
