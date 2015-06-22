@@ -307,6 +307,7 @@ SET_MOTOR_SPEED:
         movs pc, lr
 
 SET_MOTORS_SPEED:
+    msr CPSR_c, #SUPERVISOR_MODE
     stmfd sp!, {lr}
     cmp r0, #MAX_SPEED_MOTOR
     movgt r0, #-1
