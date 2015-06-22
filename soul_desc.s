@@ -75,7 +75,7 @@ interrupt_vector:
 .set MAX_SPEED_MOTOR,   63
 
 @ Configura valor de iteracoes para aguardar algo entre 10-15 ms
-.set LOOP_WAITING_VAL  15000
+.set LOOP_WAITING_VAL,  15000
 
 .org 0x100
 .text
@@ -182,7 +182,7 @@ READ_SONAR:
     cmp r0, #15                     @ Verifica se o sonar escolhido é válido
     bhi err_sonar_id
 
-    mov r1, =REG_DR                 @ Carrega o valor do registrador DR
+    ldr r1, =REG_DR                 @ Carrega o valor do registrador DR
     ldr r2, [r1]
 
     lsl r0, r0, #2                  @ Desloca o numero do sonar para a posição correta
