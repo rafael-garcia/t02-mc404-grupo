@@ -41,13 +41,12 @@ interrupt_vector:
 .set MASK_MOTOR_1_WRITE,          0b00000010000000000000000000000000
 .set MASK_MOTORS,                 0b11111101111110000000000000000000 @ MSB 14 bits = 1+6 bits para cada motor
 .set MASK_MOTORS_WRITE,           0b00000010000001000000000000000000
-.set MASK_SONAR_MUX,              0b00000000000000000000000000111100
-.set MASK_SONAR_TRIGGER,          0b00000000000000000000000000000010
+.set MASK_SONAR_MUX,              0b11111111111111111111111111000011
+.set MASK_SONAR_TRIGGER,          0b11111111111111111111111111111101
 .set MASK_SIG_HIGH_TRIGGER,       0b00000000000000000000000000000010
 .set MASK_SIG_LOW_TRIGGER,        0b11111111111111111111111111111101
-.set MASK_FLAG,                   0b00000000000000000000000000000001
-.set MASK_FLAG_READ,              0b11111111111111111111111111111110
-.set MASK_SONAR_DATA,             0b11111111111111000000000000111111
+.set MASK_FLAG_READ,              0b00000000000000000000000000000001
+.set MASK_SONAR_DATA,             0b00000000000000111111111111000000
 
 @ Configura enderecos TZIC
 .set TZIC_BASE,        0x0FFFC000
@@ -204,10 +203,10 @@ READ_SONAR:
     ldr r2, [r1]
 
     lsl r0, r0, #2                  @ Desloca o numero do sonar para a posição correta
-    bic r2, r2, #MASK_SONAR_MUX     @ Aplica a mascara no valor do registrador
+    and r2, r2, #MASK_SONAR_MUX     @ Aplica a mascara no valor do registrador
     orr r2, r2, r0
 
-    bic r2, r2, #MASK_SONAR_TRIGGER @ Zera o trigger
+    and r2, r2, #MASK_SONAR_TRIGGER @ Zera o trigger
     str r2, [r1]
 
     stmfd sp!, {r0-r1}              @ A funcao LOOP_WAITING ira sujar os registradores r0-r1
@@ -230,7 +229,7 @@ READ_SONAR:
     wait_flag:                      @ Le a flag, e aguarda ela ser setada
         ldr r1, =GPIO_DR
         ldr r2, [r1]
-        bic r2, r2, #MASK_FLAG_READ
+        and r2, r2, #MASK_FLAG_READ
         cmp r2, #1
         beq sonar_value
         
@@ -244,7 +243,7 @@ READ_SONAR:
         ldr r1, =GPIO_DR
         ldr r2, [r1]
         ldr r3, =MASK_SONAR_DATA
-        bic r2, r2, r3
+        and r2, r2, r3
         lsr r0, r2, #6              @ Após utilizar a máscara, desloca o valor e move para r0
 
     ldmfd sp!, {lr}
