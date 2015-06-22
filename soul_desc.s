@@ -6,6 +6,7 @@
 
 _start:     
 
+@ Configura o vetor de interrupcoes
 interrupt_vector:
     b RESET_HANDLER
 .org 0x08
@@ -21,10 +22,10 @@ interrupt_vector:
 .set IRQ_STACK,        0x777FF800
 .set LOCO_STACK,       0x777FF000
 
-@ Configura enderecos GPIO (entradas e saidas)
-.set REG_DR,           0x53F84000     @Data Register
-.set REG_GDIR,         0x53F84004     @Direction Register (n-bit = 0 -> entrada, n-bit = 1 -> saida)
-.set REG_PSR,          0x53F84008     @Pad status register - apenas para leitura
+@ Configura enderecos dos registradores do GPIO (entradas e saidas)
+.set GPIO_DR,           0x53F84000     @Data Register
+.set GPIO_GDIR,         0x53F84004     @Direction Register (n-bit = 0 -> entrada, n-bit = 1 -> saida)
+.set GPIO_PSR,          0x53F84008     @Pad status register - apenas para leitura
 
 @ Configuracao de mascaras para o GPIO
 .set MASK_GDIR,                   0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
@@ -59,8 +60,8 @@ interrupt_vector:
 .set GPT_IR,           0x53FA000C
 
 @ Configura valores das syscalls
-.set ID_READ_SONAR,       08
-.set ID_SET_MOTOR_SPEED,  09
+.set ID_READ_SONAR,       8
+.set ID_SET_MOTOR_SPEED,  9
 .set ID_SET_MOTORS_SPEED, 10
 .set ID_GET_TIME,         11
 .set ID_SET_TIME,         12
@@ -89,6 +90,12 @@ RESET_HANDLER:
     @Set interrupt table base address on coprocessor 15.
     ldr r0, =interrupt_vector
     mcr p15, 0, r0, c12, c0, 0
+
+@ Configura o registrador GDIR do GPIO, para definir quais perifericos estarao em modo de entrada ou saida.
+SET_GPIO:
+    ldr r0, =GPIO_GDIR
+    ldr r1, =MASK_GDIR
+    str r1, [r0]
 
 @ enderecos encontrados no datasheet IMX53-gpt.pdf na pagina do lab08 (tabela da pag 06)
 SET_GPT:     
@@ -182,7 +189,7 @@ READ_SONAR:
     cmp r0, #15                     @ Verifica se o sonar escolhido é válido
     bhi err_sonar_id
 
-    mov r1, =REG_DR                 @ Carrega o valor do registrador DR
+    mov r1, =GPIO_DR                 @ Carrega o valor do registrador DR
     ldr r2, [r1]
 
     lsl r0, r0, #2                  @ Desloca o numero do sonar para a posição correta
@@ -192,29 +199,38 @@ READ_SONAR:
     bic r2, r2, #MASK_SONAR_TRIGGER @ Zera o trigger
     str r2, [r1]
 
+    stmfd sp!, {r0-r1}              @ A funcao LOOP_WAITING ira sujar os registradores r0-r1
     bl LOOP_WAITING                 @ Aguarda 10-15ms
+    ldmfd sp!, {r0-r1}
 
     ldr r2, [r1]
     orr r2, r2, #MASK_SONAR_TRIGGER @ Seta o trigger
     str r2, [r1]
 
+    stmfd sp!, {r0-r1}              @ A funcao LOOP_WAITING ira sujar os registradores r0-r1
     bl LOOP_WAITING                 @ Aguarda 10-15ms
+    ldmfd sp!, {r0-r1}
+
 
     ldr r2, [r1]
     bic r2, r2, #MASK_SONAR_TRIGGER @ Zera o trigger
     str r2, [r1]
 
     wait_flag:                      @ Le a flag, e aguarda ela ser setada
-        ldr r1, =REG_DR
+        ldr r1, =GPIO_DR
         ldr r2, [r1]
         bic r2, r2, #MASK_FLAG_READ
         cmp r2, #1
         beq sonar_value
-        bl LOOP_WAITING
+        
+        stmfd sp!, {r0-r1}              @ A funcao LOOP_WAITING ira sujar os registradores r0-r1
+        bl LOOP_WAITING                 @ Aguarda 10-15ms
+        ldmfd sp!, {r0-r1}
+
         b wait_flag
 
     sonar_value:                    @ Recebe o valor lido do registrador
-        ldr r1, =REG_DR
+        ldr r1, =GPIO_DR
         ldr r2, [r1]
         bic r2, r2, #MASK_SONAR_DATA
         lsr r0, r2, #6              @ Após utilizar a máscara, desloca o valor e move para r0
@@ -248,7 +264,7 @@ SET_MOTOR_SPEED:
         ldr r1, =MASK_MOTOR_0_WRITE
         orr r2, r2, r1          @ combina a velocidade com a flag write
 
-        ldr r0, =REG_DR         @ carrega o endereco de DR
+        ldr r0, =GPIO_DR         @ carrega o endereco de DR
         ldr r3, [r0]            @ carrega o valor de DR
         orr r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
         str r2, [r0]            @ guarda do novo valor no endereco correspondente a DR
@@ -263,7 +279,7 @@ SET_MOTOR_SPEED:
         ldr r1, =MASK_MOTOR_1_WRITE
         orr r2, r2, r1          @ combina a velocidade com a flag write
 
-        ldr r0, =REG_DR         @ carrega o endereco de DR
+        ldr r0, =GPIO_DR         @ carrega o endereco de DR
         ldr r3, [r0]            @ carrega o valor de DR
         orr r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
         str r2, [r0]            @ guarda do novo valor no endereco correspondente a DR
@@ -297,7 +313,7 @@ SET_MOTORS_SPEED:
     ldr r3, =MASK_MOTORS_WRITE
     orr r2, r2, r3       @ combina com as flags de write
 
-    ldr r0, =REG_DR      @ carrega o endereco de DR
+    ldr r0, =GPIO_DR      @ carrega o endereco de DR
     ldr r3, [r0]         @ carrega o valor de DR
     orr r2, r2, r3       @ combina os valores ja pre combinados de ambos os motores com o de DR
     str r2, [r0]         @ guarda o novo valor no endereco correspondente a DR
@@ -329,7 +345,7 @@ LOOP_WAITING:
       add r0, r0, #1
       cmp r0, r1
       ble do
-    mov pc, lr
+    movs pc, lr
 
 
 .data
