@@ -219,7 +219,8 @@ READ_SONAR:
     ldmfd sp!, {r0-r1}
 
     ldr r2, [r1]
-    orr r2, r2, #MASK_SONAR_TRIGGER @ Seta o trigger
+    ldr r3, =MASK_SONAR_TRIGGER
+    orr r2, r2, r3		    @ Seta o trigger
     str r2, [r1]
 
     stmfd sp!, {r0-r1}              @ A funcao LOOP_WAITING ira sujar os registradores r0-r1
