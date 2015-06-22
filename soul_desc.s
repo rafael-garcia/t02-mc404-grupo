@@ -1,3 +1,8 @@
+@ padroes adotados:
+@   - funcoes: palavras separadas por underscore
+@   - funcoes internas: lower case
+@   - syscalls, funcoes de inicializacao e valores fixos: upper case
+
 @Mudar para nivel usuario
 @Chamar codigo de controle
 
