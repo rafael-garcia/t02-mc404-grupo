@@ -76,7 +76,7 @@ interrupt_vector:
 .set MAX_SPEED_MOTOR,   63
 
 @ Configura valor de iteracoes para aguardar algo entre 10-15 ms
-.set LOOP_WAITING_VAL  15000
+.set LOOP_WAITING_VAL,  15000
 
 .org 0x100
 .text
@@ -189,7 +189,7 @@ READ_SONAR:
     cmp r0, #15                     @ Verifica se o sonar escolhido é válido
     bhi err_sonar_id
 
-    mov r1, =GPIO_DR                 @ Carrega o valor do registrador DR
+    ldr r1, =GPIO_DR                 @ Carrega o valor do registrador DR
     ldr r2, [r1]
 
     lsl r0, r0, #2                  @ Desloca o numero do sonar para a posição correta
@@ -232,7 +232,8 @@ READ_SONAR:
     sonar_value:                    @ Recebe o valor lido do registrador
         ldr r1, =GPIO_DR
         ldr r2, [r1]
-        bic r2, r2, #MASK_SONAR_DATA
+        ldr r3, =MASK_SONAR_DATA
+        bic r2, r2, r3
         lsr r0, r2, #6              @ Após utilizar a máscara, desloca o valor e move para r0
 
     ldmfd sp!, {lr}
