@@ -17,15 +17,13 @@ interrupt_vector:
 .org 0x08
     b SVC_HANDLER
 
-.set DATA_BASE_ADDR, 0x77801800 @ Parte da memoria destinada aos dados (definido no Makefile do projeto)
+.set DATA_BASE_ADDR, 0x77801900 @ Parte da memoria destinada aos dados (definido no Makefile do projeto)
 
 @Configuracao de pilhas - cada uma tem 0x800 enderecos = 2KB
-.set USER_STACK,       DATA_BASE_ADDR
-.set FIQ_STACK,        0x77801000
-.set SUPERVISOR_STACK, 0x77800800
-.set ABORT_STACK,      0x77800000
-.set IRQ_STACK,        0x777FF800
-.set LOCO_STACK,       0x777FF000
+.set USER_STACK,       0x77802100
+.set SUPERVISOR_STACK, 0x77802900
+.set IRQ_STACK,        0x77803100
+.set LOCO_STACK,       0x77803900
 
 @ Configura enderecos dos registradores do GPIO (entradas e saidas)
 .set GPIO_DR,           0x53F84000     @Data Register
