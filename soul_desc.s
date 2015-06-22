@@ -161,7 +161,7 @@ SET_STACKS:
     ldr sp, =SUPERVISOR_STACK
 
     msr CPSR_c, #0x10       @ USER mode, IRQ/FIQ enabled
-    ldr sp, =LOCO
+    ldr sp, =LOCO_STACK
 
 
 SVC_HANDLER:
