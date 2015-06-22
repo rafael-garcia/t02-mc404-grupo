@@ -81,7 +81,7 @@ interrupt_vector:
 .set TIME_SZ,          100
 
 .set MAX_ALARMS,        10
-.set MAX_ALARMS_ARRAY_SIZE 20 @ tem que ser o dobro da variavel anterior porque
+.set MAX_ALARMS_ARRAY_SIZE, 20 @ tem que ser o dobro da variavel anterior porque
                               @ o vetor de alarmes precisa de 2 bytes para cada elemento
 
 @ Configura valor maximo de velocidade (sao 6 bits = 0b111111 = #63)
