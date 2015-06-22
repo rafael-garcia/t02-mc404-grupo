@@ -72,6 +72,12 @@ interrupt_vector:
 .set ID_SET_TIME,         12
 .set ID_SET_ALARM,        13
 
+@ Definicao de valores para o CPSR para cada modo de operacao
+.set USER_MODE,           0xDF
+.set IRQ_MODE,            0xD2
+.set SUPERVISOR_MODE,     0x13
+.set LOCO_MODE,           0x10
+
 @ Configura frequencia para fazer a contagem (system time)
 .set TIME_SZ,          100
 
@@ -156,17 +162,17 @@ SET_TZIC:
 SET_STACKS:
 
     @instrucao msr - habilita interrupcoes
-    msr CPSR_c, #0xDF       @ SYSTEM mode, IRQ/FIQ disabled
+    msr CPSR_c, #USER_MODE       @ SYSTEM mode, IRQ/FIQ disabled
     ldr sp, =USER_STACK
 
-    msr CPSR_c, #0xD2       @ IRQ mode, IRQ/FIQ disabled
+    msr CPSR_c, #IRQ_MODE       @ IRQ mode, IRQ/FIQ disabled
     ldr sp, =IRQ_STACK
 
-    msr CPSR_c, #0x13       @ SUPERVISOR mode, IRQ/FIQ enabled
+    msr CPSR_c, #SUPERVISOR_MODE       @ SUPERVISOR mode, IRQ/FIQ enabled
     ldr sp, =SUPERVISOR_STACK
 
-    msr CPSR_c, #0x10       @ USER mode, IRQ/FIQ enabled
-    ldr sp, =LOCO
+    msr CPSR_c, #LOCO_MODE       @ USER mode, IRQ/FIQ enabled
+    ldr sp, =LOCO_STACK
 
 
 SVC_HANDLER:
