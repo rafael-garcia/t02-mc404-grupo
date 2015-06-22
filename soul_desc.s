@@ -216,7 +216,8 @@ READ_SONAR:
     sonar_value:                    @ Recebe o valor lido do registrador
         ldr r1, =REG_DR
         ldr r2, [r1]
-        bic r2, r2, #MASK_SONAR_DATA
+        ldr r3, =MASK_SONAR_DATA
+        bic r2, r2, r3
         lsr r0, r2, #6              @ Após utilizar a máscara, desloca o valor e move para r0
 
     ldmfd sp!, {lr}
