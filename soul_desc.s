@@ -82,6 +82,8 @@ interrupt_vector:
 .set TIME_SZ,          100
 
 .set MAX_ALARMS,        10
+.set MAX_ALARMS_ARRAY_SIZE 20 @ tem que ser o dobro da variavel anterior porque
+                              @ o vetor de alarmes precisa de 2 bytes para cada elemento
 
 @ Configura valor maximo de velocidade (sao 6 bits = 0b111111 = #63)
 .set MAX_SPEED_MOTOR,   63
@@ -96,6 +98,9 @@ interrupt_vector:
   ldr r2, =CONTADOR_TEMPO
   mov r0, #0
   str r0, [r2]
+
+  ldr r2, =CONTADOR_ALARM
+  str r0, [r2] 
 
 RESET_HANDLER:
     @Set interrupt table base address on coprocessor 15.
@@ -255,7 +260,6 @@ READ_SONAR:
         ldmfd sp!, {lr}
         movs pc, lr
     
-
 SET_MOTOR_SPEED:
     stmfd sp!, {lr}
     cmp r0, #MAX_SPEED_MOTOR
@@ -347,6 +351,43 @@ SET_TIME:
     movs pc, lr
 
 SET_ALARM:
+    stmfd sp!, {r0-r1, lr}
+    
+    bl GET_TIME
+    mov r2, r0 @ guarda o tempo que foi buscado pela funcao GET_TIME
+    ldmfd sp!, {r0-r1}
+
+    cmp r1, r2
+    movge r0, #-2
+    bge fim_set_alarm
+
+    ldr r2, =CONTADOR_ALARM
+    ldr r3, [r2]
+
+    cmp r3, #MAX_ALARMS
+    movgt r0, #-1
+    bgt fim_set_alarm
+
+    add r3, r3, #1 @ incrementa em um o contador de alarmes
+    str r3, [r2]
+
+    @ lida com o vetor de alarmes
+    ldr r2, =VETOR_ALARM @ carrega o endereco de memoria do vetor
+    percorre_vetor_alarm:
+      ldr r3, [r2]         @ carrega o valor da posicao atual do vetor
+      cmp r3, #0 @ as posicoes sao iniciadas com 0, entao 0 = posicao vazia
+      
+      beq guarda_alarm @ ja encontrou uma posicao disponivel no vetor
+      add r2, r2, #8 @ desloca o cursor do vetor uma posicao para frente
+      b percorre_vetor_alarm
+
+    guarda_alarm:
+      str r0, [r2]      @ guarda o endereco do ponteiro da funcao
+      str r1, [r2, #4]  @ guarda o tempo em que o alarme deve ser acionado
+
+    fim_set_alarm:
+      ldmfd sp!, {lr}
+      movs pc, lr
 
 @ funcao que faz LOOP_WAITING_VAL iteracoes para alcancar um delay desejavel de 10-15ms
 LOOP_WAITING:
@@ -362,3 +403,5 @@ LOOP_WAITING:
 
 .data
   CONTADOR_TEMPO: .word 0
+  CONTADOR_ALARM: .word 0
+  VETOR_ALARM:    .space MAX_ALARMS_ARRAY_SIZE
