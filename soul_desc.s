@@ -67,9 +67,10 @@ interrupt_vector:
 @ Configura frequencia para fazer a contagem (system time)
 .set TIME_SZ,          100
 
+.set MAX_ALARMS,        10
 
 @ Configura valor maximo de velocidade (sao 6 bits = 0b111111 = #63)
-.set MAX_SPEED_MOTOR   63
+.set MAX_SPEED_MOTOR,   63
 
 @ Configura valor de iteracoes para aguardar algo entre 10-15 ms
 .set LOOP_WAITING_VAL  15000
