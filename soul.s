@@ -57,9 +57,10 @@
 .set ID_SET_TIME,         12
 .set ID_SET_ALARM,        13
 
-@ Definicao de valores para o CPSR para cada modo de operacao
-.set USER_MODE,           0xDF
-.set IRQ_MODE,            0xD2
+@ Definicao de valores para os mode bits do CPSR para cada modo de operacao
+@ Seguindo a definicao de http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0290g/I27695.html
+.set USER_MODE,           0x1F
+.set IRQ_MODE,            0x12
 .set SUPERVISOR_MODE,     0x13
 .set LOCO_MODE,           0x10
 
