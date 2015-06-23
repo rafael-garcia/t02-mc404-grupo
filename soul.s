@@ -36,7 +36,6 @@ interrupt_vector:
 .set MASK_MOTOR_0_WRITE,          0b11111110000000111111111111111111
 .set MASK_MOTOR_1_WRITE,          0b00000001111111111111111111111111
 .set MASK_SONAR_MUX,              0b11111111111111111111111111000011
-.set MASK_SONAR_TRIGGER,          0b11111111111111111111111111111101
 .set MASK_SIG_HIGH_TRIGGER,       0b00000000000000000000000000000010
 .set MASK_SIG_LOW_TRIGGER,        0b11111111111111111111111111111101
 .set MASK_FLAG_READ,              0b00000000000000000000000000000001
@@ -195,17 +194,17 @@ SVC_HANDLER:
 READ_SONAR:
     stmfd sp!, {lr}
 
-    cmp r0, #15                     @ Verifica se o sonar escolhido é válido
-    bhi err_sonar_id
+    cmp r0, #15                     @ Verifica se o sonar escolhido eh valido
+    bge err_sonar_id
 
     ldr r1, =GPIO_DR                 @ Carrega o valor do registrador DR
     ldr r2, [r1]
 
-    lsl r0, r0, #2                  @ Desloca o numero do sonar para a posição correta
+    lsl r0, r0, #2                  @ Desloca o numero do sonar para a posicao correta
     and r2, r2, #MASK_SONAR_MUX     @ Aplica a mascara no valor do registrador
     orr r2, r2, r0
 
-    and r2, r2, #MASK_SONAR_TRIGGER @ Zera o trigger
+    and r2, r2, #MASK_SIG_LOW_TRIGGER @ Zera o trigger
     str r2, [r1]
 
     stmfd sp!, {r0-r1}              @ A funcao LOOP_WAITING ira sujar os registradores r0-r1
@@ -213,7 +212,7 @@ READ_SONAR:
     ldmfd sp!, {r0-r1}
 
     ldr r2, [r1]
-    ldr r3, =MASK_SONAR_TRIGGER
+    ldr r3, =MASK_SIG_HIGH_TRIGGER
     orr r2, r2, r3          @ Seta o trigger
     str r2, [r1]
 
@@ -221,9 +220,8 @@ READ_SONAR:
     bl LOOP_WAITING                 @ Aguarda 10-15ms
     ldmfd sp!, {r0-r1}
 
-
     ldr r2, [r1]
-    bic r2, r2, #MASK_SONAR_TRIGGER @ Zera o trigger
+    and r2, r2, #MASK_SIG_LOW_TRIGGER @ Zera o trigger
     str r2, [r1]
 
     wait_flag:                      @ Le a flag, e aguarda ela ser setada
@@ -244,7 +242,7 @@ READ_SONAR:
         ldr r2, [r1]
         ldr r3, =MASK_SONAR_DATA
         and r2, r2, r3
-        lsr r0, r2, #6              @ Após utilizar a máscara, desloca o valor e move para r0
+        lsr r0, r2, #6              @ Apos utilizar a mascara, desloca o valor e move para r0
 
     ldmfd sp!, {lr}
     movs pc, lr
