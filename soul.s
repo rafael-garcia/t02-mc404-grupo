@@ -5,18 +5,11 @@
 
 @Mudar para nivel usuario
 @Chamar codigo de controle
-
+.text
 .org 0x0
 .section .iv,"a"
 
-_start:     
-
-@ Configura o vetor de interrupcoes
-interrupt_vector:
-  b RESET_HANDLER
-.org 0x08
-  b SVC_HANDLER
-
+@.set como os #define de C
 .set DATA_BASE_ADDR, 0x77801900 @ Parte da memoria destinada aos dados (definido no Makefile do projeto)
 
 @Configuracao de pilhas - cada uma tem 0x800 enderecos = 2KB
@@ -83,17 +76,23 @@ interrupt_vector:
 @ Configura valor de iteracoes para aguardar algo entre 10-15 ms
 .set LOOP_WAITING_VAL,  15000
 
+_start:
+
+@ Configura o vetor de interrupcoes
+interrupt_vector:
+  b RESET_HANDLER
+.org 0x08
+  b SVC_HANDLER
+
 .org 0x100
-.text
-.align 4
-@ Zera o contador de tempo
   ldr r2, =CONTADOR_TEMPO
   mov r0, #0
   str r0, [r2]
 
   ldr r2, =CONTADOR_ALARM
-  str r0, [r2] 
-
+  mov r0, #0
+  str r0, [r2]
+  
 RESET_HANDLER:
   @Set interrupt table base address on coprocessor 15.
   ldr r0, =interrupt_vector
@@ -108,20 +107,20 @@ SET_GPIO:
 @ enderecos encontrados no datasheet IMX53-gpt.pdf na pagina do lab08 (tabela da pag 06)
 SET_GPT:     
   ldr r3, =GPT_CR
-  mov r4, #0x00000041         @ clock_src periferico
-  str r4, [r3]
+  mov r2, #0x00000041         @ clock_src periferico
+  str r2, [r3]
 
   ldr r3, =GPT_PR
-  mov r4, #0                  @ zera o prescaler
-  str r4, [r3]
+  mov r2, #0                  @ zera o prescaler
+  str r2, [r3]
 
   ldr r3, =GPT_OCR1
-  ldr r4, =TIME_SZ             @ conta ate a constante definida
-  str r4, [r3]
+  ldr r2, =TIME_SZ             @ conta ate a constante definida
+  str r2, [r3]
 
   ldr r3, =GPT_IR
-  mov r4, #1                  @ habilita interrupcao do tipo Output Compare Channel 1
-  str r4, [r3]
+  mov r2, #1                  @ habilita interrupcao do tipo Output Compare Channel 1
+  str r2, [r3]
 
 SET_TZIC:
   @ Liga o controlador de interrupcoes
@@ -170,7 +169,6 @@ SET_STACKS:
 
   msr CPSR_c, #LOCO_MODE       @ USER mode, IRQ/FIQ enabled
   ldr sp, =LOCO_STACK
-
 
 SVC_HANDLER:
   cmp r7, #ID_READ_SONAR
@@ -368,6 +366,7 @@ SET_ALARM:
 
 @ funcao que faz LOOP_WAITING_VAL iteracoes para alcancar um delay desejavel de 10-15ms
 LOOP_WAITING:
+
 .data
   CONTADOR_TEMPO: .word 0
   CONTADOR_ALARM: .word 0
