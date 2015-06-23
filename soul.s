@@ -253,7 +253,7 @@ READ_SONAR:
   
 SET_MOTOR_SPEED:
   cmp r1, #MAX_SPEED_MOTOR
-  movgt r0, #-1
+  movhi r0, #-1
   bhi fim_set_motor
 
   cmp r0, #0
@@ -264,7 +264,7 @@ SET_MOTOR_SPEED:
   b fim_set_motor
 
   set_motor_0:
-    mov r1, r1, lsl #19          @ move o sexto bit ate o 24 bit
+    lsl r1, r1, #19          @ move o sexto bit ate o 24 bit
     ldr r0, =MASK_MOTOR_0_WRITE  @ carrega a mascara para ativar o motor 0
 
     ldr r2, =GPIO_DR             @ carrega o endereco do DR
@@ -279,7 +279,7 @@ SET_MOTOR_SPEED:
     b fim_set_motor
 
   set_motor_1:
-    mov r1, r1, lsl #26          @ move o sexto bit ate o 24 bit
+    lsl r1, r1, #26          @ move o sexto bit ate o 24 bit
     ldr r0, =MASK_MOTOR_1_WRITE  @ carrega a mascara para ativar o motor 0
 
     ldr r2, =GPIO_DR             @ carrega o endereco do DR
@@ -298,15 +298,15 @@ SET_MOTOR_SPEED:
 
 SET_MOTORS_SPEED:
   cmp r0, #MAX_SPEED_MOTOR
-  movgt r0, #-1
+  movhi r0, #-1
   bhi fim_set_motors
 
   cmp r1, #MAX_SPEED_MOTOR
-  movgt r0, #-2
+  movhi r0, #-2
   bhi fim_set_motors
 
-  mov r0, r0, lsl #19  @ move o sexto bit ate o 24 bit
-  mov r1, r1, lsl #26  @ move o sexto bit ate o 32 bit
+  lsl r0, r0, #19  @ move o sexto bit ate o 24 bit
+  lsl r1, r1, #26  @ move o sexto bit ate o 32 bit
   
   orr r3, r0, #0       @ combina a velocidade dos dois motores
   orr r3, r3, r1       @ combina a velocidade dos dois motores
@@ -344,7 +344,7 @@ SET_ALARM:
   ldr r3, [r2]
 
   cmp r3, #MAX_ALARMS
-  movgt r0, #-1
+  movhi r0, #-1
   bhi fim_set_alarm
 
   add r3, r3, #1 @ incrementa em um o contador de alarmes
