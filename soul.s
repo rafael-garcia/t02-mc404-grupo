@@ -33,8 +33,8 @@ interrupt_vector:
 @ Configuracao de mascaras para o GPIO
 .set MASK_GDIR,                   0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
 
-.set MASK_MOTOR_0_WRITE,          0b00000000000001000000000000000000
-.set MASK_MOTOR_1_WRITE,          0b00000010000000000000000000000000
+.set MASK_MOTOR_0_WRITE,          0b11111110000000111111111111111111
+.set MASK_MOTOR_1_WRITE,          0b00000001111111111111111111111111
 .set MASK_SONAR_MUX,              0b11111111111111111111111111000011
 .set MASK_SONAR_TRIGGER,          0b11111111111111111111111111111101
 .set MASK_SIG_HIGH_TRIGGER,       0b00000000000000000000000000000010
@@ -214,7 +214,7 @@ READ_SONAR:
 
     ldr r2, [r1]
     ldr r3, =MASK_SONAR_TRIGGER
-    orr r2, r2, r3		    @ Seta o trigger
+    orr r2, r2, r3          @ Seta o trigger
     str r2, [r1]
 
     stmfd sp!, {r0-r1}              @ A funcao LOOP_WAITING ira sujar os registradores r0-r1
@@ -255,45 +255,45 @@ READ_SONAR:
         movs pc, lr
     
 SET_MOTOR_SPEED:
-    cmp r0, #MAX_SPEED_MOTOR
+    cmp r1, #MAX_SPEED_MOTOR
     movgt r0, #-1
     bgt fim_set_motor
 
-    cmp r1, #0
+    cmp r0, #0
     beq set_motor_0
-    cmp r1, #1
+    cmp r0, #1
     beq set_motor_1
     mov r0, #-2
     b fim_set_motor
 
     set_motor_0:
-        mov r0, r0, LSL #19     @ move o sexto bit ate o 24 bit
-        ldr r1, =MASK_MOTOR_0_WRITE
+        mov r1, r1, lsl #19          @ move o sexto bit ate o 24 bit
+        ldr r0, =MASK_MOTOR_0_WRITE  @ carrega a mascara para ativar o motor 0
 
-        ldr r2, =GPIO_DR
-        ldr r3, [r2]
+        ldr r2, =GPIO_DR             @ carrega o endereco do DR
+        ldr r3, [r2]                 @ carrega o valor de DR em r3
 
-        bic r3, r3, r1
-        orr r3, r3, r0          @ combina a velocidade com a flag write
+        and r3, r3, r0               @ preserva todos os bits que nao sao 18:24 (motor0_x) do GPIO_DR
+        orr r3, r3, r1               @ combina a velocidade com o resultado anterior
 
-        str r3, [r2]            @ guarda do novo valor no endereco correspondente a DR
+        str r3, [r2]                 @ guarda do novo valor no endereco correspondente a DR
 
-        mov r0, #0              @ velocidade motor 0 OK
+        mov r0, #0                   @ velocidade motor 0 OK
         b fim_set_motor
 
     set_motor_1:
-        mov r0, r0, LSL #26     @ move o sexto bit ate o 32 bit
-        ldr r1, =MASK_MOTOR_1_WRITE
+        mov r1, r1, lsl #26          @ move o sexto bit ate o 24 bit
+        ldr r0, =MASK_MOTOR_1_WRITE  @ carrega a mascara para ativar o motor 0
 
-        ldr r2, =GPIO_DR
-        ldr r3, [r2]
+        ldr r2, =GPIO_DR             @ carrega o endereco do DR
+        ldr r3, [r2]                 @ carrega o valor de DR em r3
 
-        bic r3, r3, r1
-        orr r3, r3, r0          @ combina a velocidade com a flag write
+        and r3, r3, r0               @ preserva todos os bits que nao sao 25:31 (motor1_x) do GPIO_DR
+        orr r3, r3, r1               @ combina a velocidade com o resultado anterior
 
-        str r3, [r2]            @ guarda do novo valor no endereco correspondente a DR
+        str r3, [r2]                 @ guarda do novo valor no endereco correspondente a DR
 
-        mov r0, #0              @ velocidade motor 1 OK
+        mov r0, #0                   @ velocidade motor 0 OK
         b fim_set_motor
 
     fim_set_motor:
@@ -308,8 +308,8 @@ SET_MOTORS_SPEED:
     movgt r0, #-2
     bgt fim_set_motors
 
-    mov r0, r0, LSL #19  @ move o sexto bit ate o 24 bit
-    mov r1, r1, LSL #26  @ move o sexto bit ate o 32 bit
+    mov r0, r0, lsl #19  @ move o sexto bit ate o 24 bit
+    mov r1, r1, lsl #26  @ move o sexto bit ate o 32 bit
     
     orr r3, r0, #0       @ combina a velocidade dos dois motores
     orr r3, r3, r1       @ combina a velocidade dos dois motores

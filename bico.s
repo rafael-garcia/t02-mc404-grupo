@@ -38,13 +38,11 @@ set_alarm:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 set_motor_speed:
         stmfd sp!, {r4-r11, lr} @ Salva regs
-        mov r2, #9            @ reg aux para definir qual syscall sera chamada
-        cmp r1, #0              @ verifica se o motor a ser setado eh o esquerdo
-        beq esq
-        add r2, #1              @ usa o valor para o motor direito (syscall #127 = write_motor1)
+        mov r2, r0              @ Guarda a velocidade
+        mov r0, r1              @ inverte os parametros
+        mov r1, r2              @ (o .h esta especificado de um jeito e a syscall de outro)
 
-        esq:
-        mov r7, r2              @ faz o syscall (write_motors)
+        mov r7, #9              @ faz o syscall (write_motors)
         svc 0x0
         ldmfd sp!, {r4-r11, pc} @ Recupera regs (valor de lr diretamente em pc)
 

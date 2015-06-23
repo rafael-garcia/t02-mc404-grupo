@@ -11,4 +11,4 @@ void delay() {
   int i;
   /* Not the best way to delay */
   for(i = 0; i < 10000; i++ );
-}	
+}		
