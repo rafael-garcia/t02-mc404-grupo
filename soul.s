@@ -33,6 +33,8 @@ interrupt_vector:
 @ Configuracao de mascaras para o GPIO
 .set MASK_GDIR,                   0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
 
+.set MASK_MOTOR_0_WRITE,          0b00000000000001000000000000000000
+.set MASK_MOTOR_1_WRITE,          0b00000010000000000000000000000000
 .set MASK_SONAR_MUX,              0b11111111111111111111111111000011
 .set MASK_SONAR_TRIGGER,          0b11111111111111111111111111111101
 .set MASK_SIG_HIGH_TRIGGER,       0b00000000000000000000000000000010
@@ -253,7 +255,6 @@ READ_SONAR:
         movs pc, lr
     
 SET_MOTOR_SPEED:
-    stmfd sp!, {lr}
     cmp r0, #MAX_SPEED_MOTOR
     movgt r0, #-1
     bgt fim_set_motor
@@ -267,36 +268,35 @@ SET_MOTOR_SPEED:
 
     set_motor_0:
         mov r0, r0, LSL #19     @ move o sexto bit ate o 24 bit
-        ldr r2, =MASK_MOTOR_0   @ carrega a mascara que aceita o motor 0
-        and r2, r2, r0          @ combina o valor do motor 0 ja deslocado com a mascara
         ldr r1, =MASK_MOTOR_0_WRITE
-        orr r2, r2, r1          @ combina a velocidade com a flag write
 
-        ldr r0, =GPIO_DR         @ carrega o endereco de DR
-        ldr r3, [r0]            @ carrega o valor de DR
-        orr r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
-        str r2, [r0]            @ guarda do novo valor no endereco correspondente a DR
+        ldr r2, =GPIO_DR
+        ldr r3, [r2]
+
+        bic r3, r3, r1
+        orr r3, r3, r0          @ combina a velocidade com a flag write
+
+        str r3, [r2]            @ guarda do novo valor no endereco correspondente a DR
 
         mov r0, #0              @ velocidade motor 0 OK
         b fim_set_motor
 
     set_motor_1:
         mov r0, r0, LSL #26     @ move o sexto bit ate o 32 bit
-        ldr r2, =MASK_MOTOR_1   @ carrega a mascara que aceita o motor 0
-        and r2, r2, r0          @ combina o valor do motor 1 ja deslocado com a mascara
         ldr r1, =MASK_MOTOR_1_WRITE
-        orr r2, r2, r1          @ combina a velocidade com a flag write
 
-        ldr r0, =GPIO_DR         @ carrega o endereco de DR
-        ldr r3, [r0]            @ carrega o valor de DR
-        orr r2, r2, r3          @ combina os valores ja pre combinados de ambos os motores com o de DR
-        str r2, [r0]            @ guarda do novo valor no endereco correspondente a DR
+        ldr r2, =GPIO_DR
+        ldr r3, [r2]
+
+        bic r3, r3, r1
+        orr r3, r3, r0          @ combina a velocidade com a flag write
+
+        str r3, [r2]            @ guarda do novo valor no endereco correspondente a DR
 
         mov r0, #0              @ velocidade motor 1 OK
         b fim_set_motor
 
     fim_set_motor:
-        ldmfd sp!, {lr}
         movs pc, lr
 
 SET_MOTORS_SPEED:
