@@ -1,9 +1,7 @@
 #include "api_robot2.h"
 
 void _start(void) {
-	set_motor_speed(20,0);
-	delay();
-	set_motor_speed(20,1);
+	set_motor_speed(10,0);
 }
 
 /* Spend some time doing nothing. */
