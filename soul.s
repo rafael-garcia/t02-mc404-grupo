@@ -376,6 +376,15 @@ SET_ALARM:
 
 @ funcao que faz LOOP_WAITING_VAL iteracoes para alcancar um delay desejavel de 10-15ms
 LOOP_WAITING:
+    mov r0, #0
+    ldr r1, =LOOP_WAITING_VAL
+
+    do:
+      add r0, r0, #1
+      cmp r0, r1
+      ble do
+    movs pc, lr
+
 .data
   CONTADOR_TEMPO: .word 0
   CONTADOR_ALARM: .word 0
