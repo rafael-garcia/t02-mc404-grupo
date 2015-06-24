@@ -17,6 +17,9 @@ interrupt_vector:
 .org 0x08
   b SVC_HANDLER
 
+@ Inicio do codigo do usuario
+.set LOCO_CODE,                  0x77802000
+
 .set DATA_BASE_ADDR, 0x77801900 @ Parte da memoria destinada aos dados (definido no Makefile do projeto)
 
 @Configuracao de pilhas - cada uma tem 0x800 enderecos = 2KB
@@ -173,6 +176,9 @@ SET_STACKS:
   msr CPSR_c, #LOCO_MODE       @ USER mode, IRQ/FIQ enabled
   ldr sp, =LOCO_STACK
 
+  @ Pula para o endereco inicial da camada LOCO
+  ldr r0, =LOCO_CODE
+  bx r0
 
 SVC_HANDLER:
   cmp r7, #ID_READ_SONAR

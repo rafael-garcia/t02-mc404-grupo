@@ -3,12 +3,16 @@
 void delay();
 
 void _start(void) {
-	set_motor_speed(10,0);
+	set_motors_speed(20,50);
+	delay();
+
+
 }
 
 /* Spend some time doing nothing. */
 void delay() {
   int i;
   /* Not the best way to delay */
-  for(i = 0; i < 10000; i++ );
+  for(i = 0; i < 4; i++ );
+
 }		
