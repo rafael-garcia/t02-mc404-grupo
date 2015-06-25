@@ -77,7 +77,7 @@ SETS:
   .set LOCO_MODE,           0x10 @(0001 0000)
 
   @ Configura frequencia para fazer a contagem (system time)
-  .set TIME_SZ,          100
+  .set TIME_SZ,          64
 
   .set MAX_ALARMS,        10
   .set MAX_ALARMS_ARRAY_SIZE, 20 @ tem que ser o dobro da variavel anterior porque
@@ -87,7 +87,7 @@ SETS:
   .set MAX_SPEED_MOTOR,   63
 
   @ Configura valor de iteracoes para aguardar algo entre 10-15 ms
-  .set LOOP_WAITING_VAL,  70000
+  .set LOOP_WAITING_VAL,  15000
 
 .org 0x100
 .text
@@ -105,11 +105,20 @@ RESET_HANDLER:
   ldr r0, =interrupt_vector
   mcr p15, 0, r0, c12, c0, 0
 
-@ Configura o registrador GDIR do GPIO, para definir quais perifericos estarao em modo de entrada ou saida.
-SET_GPIO:
-  ldr r0, =GPIO_GDIR
-  ldr r1, =MASK_GDIR
-  str r1, [r0]
+SET_STACKS:
+
+  @instrucao msr - habilita interrupcoes
+  msr CPSR_c, #USER_MODE       @ SYSTEM mode, IRQ/FIQ disabled
+  ldr sp, =USER_STACK
+
+  msr CPSR_c, #IRQ_MODE       @ IRQ mode, IRQ/FIQ disabled
+  ldr sp, =IRQ_STACK
+
+  msr CPSR_c, #SUPERVISOR_MODE       @ SUPERVISOR mode, IRQ/FIQ enabled
+  ldr sp, =SUPERVISOR_STACK
+
+  msr CPSR_c, #LOCO_MODE       @ USER mode, IRQ/FIQ enabled
+  ldr sp, =LOCO_STACK
 
 @ enderecos encontrados no datasheet IMX53-gpt.pdf na pagina do lab08 (tabela da pag 06)
 SET_GPT:     
@@ -162,22 +171,15 @@ SET_TZIC:
   mov r0, #1
   str r0, [r1, #TZIC_INTCTRL]
 
-SET_STACKS:
+@ Configura o registrador GDIR do GPIO, para definir quais perifericos estarao em modo de entrada ou saida.
+SET_GPIO:
+  ldr r0, =GPIO_GDIR
+  ldr r1, =MASK_GDIR
+  str r1, [r0]
 
-  @instrucao msr - habilita interrupcoes
-  msr CPSR_c, #USER_MODE       @ SYSTEM mode, IRQ/FIQ disabled
-  ldr sp, =USER_STACK
-
-  msr CPSR_c, #IRQ_MODE       @ IRQ mode, IRQ/FIQ disabled
-  ldr sp, =IRQ_STACK
-
-  msr CPSR_c, #SUPERVISOR_MODE       @ SUPERVISOR mode, IRQ/FIQ enabled
-  ldr sp, =SUPERVISOR_STACK
-
+  @Pula para o endereco inicial da camada LOCO
   msr CPSR_c, #LOCO_MODE       @ USER mode, IRQ/FIQ enabled
   ldr sp, =LOCO_STACK
-
-  @ Pula para o endereco inicial da camada LOCO
   ldr r0, =LOCO_CODE
   bx r0
 
@@ -385,11 +387,6 @@ LOOP_WAITING:
       cmp r0, r1
       ble do
     mov pc, lr
-
-@OTHER_HANDLER:
-@IRQ_HANDLER:
-@  ldr r0, =LOCO_CODE
-@  bx r0
 
 .data
   CONTADOR_TEMPO: .word 0
