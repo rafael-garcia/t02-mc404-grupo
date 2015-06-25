@@ -3,10 +3,8 @@
 void delay();
 
 void _start(void) {
+	int a = 0;
 	set_motors_speed(20,50);
-	delay();
-
-
 }
 
 /* Spend some time doing nothing. */

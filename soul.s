@@ -18,75 +18,76 @@ interrupt_vector:
   b SVC_HANDLER
 
 @ Inicio do codigo do usuario
-.set LOCO_CODE,                  0x77802000
+SETS:
+  .set LOCO_CODE,                  0x77802000
 
-.set DATA_BASE_ADDR, 0x77801900 @ Parte da memoria destinada aos dados (definido no Makefile do projeto)
+  .set DATA_BASE_ADDR, 0x77801900 @ Parte da memoria destinada aos dados (definido no Makefile do projeto)
 
-@Configuracao de pilhas - cada uma tem 0x800 enderecos = 2KB
-.set USER_STACK,       0x77802100
-.set SUPERVISOR_STACK, 0x77802900
-.set IRQ_STACK,        0x77803100
-.set LOCO_STACK,       0x77803900
+  @Configuracao de pilhas - cada uma tem 0x800 enderecos = 2KB
+  .set USER_STACK,       0x77802100
+  .set SUPERVISOR_STACK, 0x77802900
+  .set IRQ_STACK,        0x77803100
+  .set LOCO_STACK,       0x77803900
 
-@ Configura enderecos dos registradores do GPIO (entradas e saidas)
-.set GPIO_DR,           0x53F84000     @Data Register
-.set GPIO_GDIR,         0x53F84004     @Direction Register (n-bit = 0 -> entrada, n-bit = 1 -> saida)
-.set GPIO_PSR,          0x53F84008     @Pad status register - apenas para leitura
+  @ Configura enderecos dos registradores do GPIO (entradas e saidas)
+  .set GPIO_DR,           0x53F84000     @Data Register
+  .set GPIO_GDIR,         0x53F84004     @Direction Register (n-bit = 0 -> entrada, n-bit = 1 -> saida)
+  .set GPIO_PSR,          0x53F84008     @Pad status register - apenas para leitura
 
-@ Configuracao de mascaras para o GPIO
-.set MASK_GDIR,                   0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
+  @ Configuracao de mascaras para o GPIO
+  .set MASK_GDIR,                   0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
 
-.set MASK_MOTOR_0_WRITE,          0b11111110000000111111111111111111
-.set MASK_MOTOR_1_WRITE,          0b00000001111111111111111111111111
-.set MASK_SONAR_MUX,              0b11111111111111111111111111000011
-.set MASK_SIG_HIGH_TRIGGER,       0b00000000000000000000000000000010
-.set MASK_SIG_LOW_TRIGGER,        0b11111111111111111111111111111101
-.set MASK_FLAG_READ,              0b00000000000000000000000000000001
-.set MASK_SONAR_DATA,             0b00000000000000111111111111000000
+  .set MASK_MOTOR_0_WRITE,          0b11111110000000111111111111111111
+  .set MASK_MOTOR_1_WRITE,          0b00000001111111111111111111111111
+  .set MASK_SONAR_MUX,              0b11111111111111111111111111000011
+  .set MASK_SIG_HIGH_TRIGGER,       0b00000000000000000000000000000010
+  .set MASK_SIG_LOW_TRIGGER,        0b11111111111111111111111111111101
+  .set MASK_FLAG_READ,              0b00000000000000000000000000000001
+  .set MASK_SONAR_DATA,             0b00000000000000111111111111000000
 
-@ Configura enderecos TZIC
-.set TZIC_BASE,        0x0FFFC000
-.set TZIC_INTCTRL,     0x0
-.set TZIC_INTSEC1,     0x84 
-.set TZIC_ENSET1,      0x104
-.set TZIC_PRIOMASK,    0xC
-.set TZIC_PRIORITY9,   0x424
+  @ Configura enderecos TZIC
+  .set TZIC_BASE,        0x0FFFC000
+  .set TZIC_INTCTRL,     0x0
+  .set TZIC_INTSEC1,     0x84 
+  .set TZIC_ENSET1,      0x104
+  .set TZIC_PRIOMASK,    0xC
+  .set TZIC_PRIORITY9,   0x424
 
-@ Configura enderecos GPT
-.set GPT_CR,           0x53FA0000
-.set GPT_PR,           0x53FA0004
-.set GPT_SR,           0x53FA0008
-.set GPT_OCR1,         0x53FA0010
-.set GPT_IR,           0x53FA000C
+  @ Configura enderecos GPT
+  .set GPT_CR,           0x53FA0000
+  .set GPT_PR,           0x53FA0004
+  .set GPT_SR,           0x53FA0008
+  .set GPT_OCR1,         0x53FA0010
+  .set GPT_IR,           0x53FA000C
 
-@ Configura valores das syscalls
-.set ID_READ_SONAR,       8
-.set ID_SET_MOTOR_SPEED,  9
-.set ID_SET_MOTORS_SPEED, 10
-.set ID_GET_TIME,         11
-.set ID_SET_TIME,         12
-.set ID_SET_ALARM,        13
+  @ Configura valores das syscalls
+  .set ID_READ_SONAR,       8
+  .set ID_SET_MOTOR_SPEED,  9
+  .set ID_SET_MOTORS_SPEED, 10
+  .set ID_GET_TIME,         11
+  .set ID_SET_TIME,         12
+  .set ID_SET_ALARM,        13
 
-@ Definicao de valores para o CPSR para cada modo de operacao
-          @7    6    5    4    [3:0]   
-@disabled IRQ   FIQ THUMB mode
-.set USER_MODE,           0xDF @(1101 1111)
-.set IRQ_MODE,            0xD2 @(1101 0010)
-.set SUPERVISOR_MODE,     0x13 @(0001 0011)
-.set LOCO_MODE,           0x10 @(0001 0000)
+  @ Definicao de valores para o CPSR para cada modo de operacao
+            @7    6    5    4    [3:0]   
+  @disabled IRQ   FIQ THUMB mode
+  .set USER_MODE,           0xDF @(1101 1111)
+  .set IRQ_MODE,            0xD2 @(1101 0010)
+  .set SUPERVISOR_MODE,     0x13 @(0001 0011)
+  .set LOCO_MODE,           0x10 @(0001 0000)
 
-@ Configura frequencia para fazer a contagem (system time)
-.set TIME_SZ,          100
+  @ Configura frequencia para fazer a contagem (system time)
+  .set TIME_SZ,          100
 
-.set MAX_ALARMS,        10
-.set MAX_ALARMS_ARRAY_SIZE, 20 @ tem que ser o dobro da variavel anterior porque
-                @ o vetor de alarmes precisa de 2 bytes para cada elemento
+  .set MAX_ALARMS,        10
+  .set MAX_ALARMS_ARRAY_SIZE, 20 @ tem que ser o dobro da variavel anterior porque
+                  @ o vetor de alarmes precisa de 2 bytes para cada elemento
 
-@ Configura valor maximo de velocidade (sao 6 bits = 0b111111 = #63)
-.set MAX_SPEED_MOTOR,   63
+  @ Configura valor maximo de velocidade (sao 6 bits = 0b111111 = #63)
+  .set MAX_SPEED_MOTOR,   63
 
-@ Configura valor de iteracoes para aguardar algo entre 10-15 ms
-.set LOOP_WAITING_VAL,  15000
+  @ Configura valor de iteracoes para aguardar algo entre 10-15 ms
+  .set LOOP_WAITING_VAL,  70000
 
 .org 0x100
 .text
@@ -383,7 +384,12 @@ LOOP_WAITING:
       add r0, r0, #1
       cmp r0, r1
       ble do
-    movs pc, lr
+    mov pc, lr
+
+@OTHER_HANDLER:
+@IRQ_HANDLER:
+@  ldr r0, =LOCO_CODE
+@  bx r0
 
 .data
   CONTADOR_TEMPO: .word 0
