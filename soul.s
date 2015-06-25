@@ -13,9 +13,26 @@ _start:
 
 @ Configura o vetor de interrupcoes
 interrupt_vector:
+
   b RESET_HANDLER
+
+.org 0x04
+  b DEFAULT_HANDLER
+
 .org 0x08
   b SVC_HANDLER
+
+.org 0x0C
+  b DEFAULT_HANDLER
+
+.org 0x10
+  b DEFAULT_HANDLER
+
+.org 0x18
+  b IRQ_HANDLER
+
+.org 0x1C
+  b DEFAULT_HANDLER
 
 @ Inicio do codigo do usuario
 SETS:
@@ -387,6 +404,9 @@ LOOP_WAITING:
       cmp r0, r1
       ble do
     mov pc, lr
+
+DEFAULT_HANDLER:
+IRQ_HANDLER:
 
 .data
   CONTADOR_TEMPO: .word 0
