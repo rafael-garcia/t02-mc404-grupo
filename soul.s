@@ -377,6 +377,7 @@ SET_ALARM:
   str r3, [r2]
 
   @ lida com o vetor de alarmes
+  @@@ NAO pode entrar aqui com o vetor cheio @@@
   ldr r2, =VETOR_ALARM @ carrega o endereco de memoria do vetor
   percorre_vetor_alarm:
     ldr r3, [r2]         @ carrega o valor da posicao atual do vetor
@@ -405,8 +406,57 @@ LOOP_WAITING:
       ble do
     mov pc, lr
 
+IRQ_HANDLER: @ como no lab 08
+  stmfd sp!, {r4-r11, lr}
+  
+  @ informa que o processador esta ciente da interrupcao
+  ldr r3, =GPT_SR
+  mov r2, #0
+  str r2, [r3]             
+
+  @ carrega e atualiza o contador de tempo
+  ldr r3, =CONTADOR_TEMPO  @ carrega em r3 a posicao de memoria do contador
+  ldr r2, [r3]             @ carrega em r2 o conteudo que esta na posicao de memoria apontada por r3
+  add r2, r2, #1           @ incrementa o contador em 1
+  str r2, [r3]             @ guarda o valor atualizado na posicao de memoria do contador
+
+  @ percorre o vetor de alarmes procurando alarmes setados para o horario atual
+  ldr r3, =VETOR_ALARM
+  mov r0, #0
+  percorre_vetor_alarm_disparo:
+    ldr r1, [r3, #4]         @ a struct eh: endereco da funcao, tempo do alarme
+    cmp r1, r2               @ compara o tempo atual com o tempo do alarme do elemento do vetor
+    beq dispara_alarme
+
+    add r3, r3, #8           @ incrementa o indice para avancar no vetor de alarmes
+    add r0, r0, #1
+    cmp r0, #MAX_ALARMS
+    beq fim_irq_handler
+    b percorre_vetor_alarm_disparo
+
+  dispara_alarme:
+    stmfd sp!, {r0-r3}
+
+    ldr r1, [r3]        @ carrega o endereco da funcao a ser chamada
+    blx r1              @ invoca a funcao
+    
+    @ esvazia essa posicao do vetor
+    ldmfd sp!, {r0-r3}
+    mov r0, #0
+    str r0, [r3, #4]
+
+    @ diminui contador de alarmes
+    ldr r1, =MAX_ALARMS
+    ldr r0, [r1]
+    sub r0, r0, #1
+    str r0, [r1]
+
+  fim_irq_handler:
+    ldmfd sp!, {r4-r11, lr}
+    sub lr, lr, #4           @ correcao do valor de lr = pc + 8
+    movs pc, lr
+
 DEFAULT_HANDLER:
-IRQ_HANDLER:
 
 .data
   CONTADOR_TEMPO: .word 0
