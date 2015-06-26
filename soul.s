@@ -78,13 +78,13 @@ SETS:
   .set GPT_IR,           0x53FA000C
 
   @ Configura valores das syscalls
-  .set ID_INNER_BACK_TO_IRQ 7
-  .set ID_READ_SONAR,       8
-  .set ID_SET_MOTOR_SPEED,  9
-  .set ID_SET_MOTORS_SPEED, 10
-  .set ID_GET_TIME,         11
-  .set ID_SET_TIME,         12
-  .set ID_SET_ALARM,        13
+  .set ID_INNER_BACK_TO_IRQ, 7
+  .set ID_READ_SONAR,        8
+  .set ID_SET_MOTOR_SPEED,   9
+  .set ID_SET_MOTORS_SPEED,  10
+  .set ID_GET_TIME,          11
+  .set ID_SET_TIME,          12
+  .set ID_SET_ALARM,         13
 
   @ Definicao de valores para o CPSR para cada modo de operacao
             @7    6    5    4    [3:0]   
@@ -432,7 +432,7 @@ IRQ_HANDLER: @ como no lab 08
 
   @ percorre o vetor de alarmes procurando alarmes setados para o horario atual
   ldr r3, =VETOR_ALARM
-  mov r0-r1, #0
+  mov r0, #0
   percorre_vetor_alarm_disparo:
     ldr r1, [r3, #4]         @ a struct eh: endereco da funcao, tempo do alarme
     cmp r1, r2               @ compara o tempo atual com o tempo do alarme do elemento do vetor
