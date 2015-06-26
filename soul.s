@@ -78,6 +78,7 @@ SETS:
   .set GPT_IR,           0x53FA000C
 
   @ Configura valores das syscalls
+  .set ID_INNER_BACK_TO_IRQ 7
   .set ID_READ_SONAR,       8
   .set ID_SET_MOTOR_SPEED,  9
   .set ID_SET_MOTORS_SPEED, 10
@@ -201,6 +202,9 @@ SET_GPIO:
   bx r0
 
 SVC_HANDLER:
+  cmp r7, #ID_INNER_BACK_TO_IRQ
+  beq INNER_BACK_TO_IRQ
+
   cmp r7, #ID_READ_SONAR
   beq READ_SONAR
 
@@ -406,6 +410,12 @@ LOOP_WAITING:
       ble do
     mov pc, lr
 
+INNER_BACK_TO_IRQ:
+  stmfd sp!, {lr}
+  msr CPSR_c, #IRQ_MODE
+  ldmfd sp!, {lr}
+  movs pc, lr
+
 IRQ_HANDLER: @ como no lab 08
   stmfd sp!, {r4-r11, lr}
   
@@ -422,7 +432,7 @@ IRQ_HANDLER: @ como no lab 08
 
   @ percorre o vetor de alarmes procurando alarmes setados para o horario atual
   ldr r3, =VETOR_ALARM
-  mov r0, #0
+  mov r0-r1, #0
   percorre_vetor_alarm_disparo:
     ldr r1, [r3, #4]         @ a struct eh: endereco da funcao, tempo do alarme
     cmp r1, r2               @ compara o tempo atual com o tempo do alarme do elemento do vetor
@@ -435,13 +445,22 @@ IRQ_HANDLER: @ como no lab 08
     b percorre_vetor_alarm_disparo
 
   dispara_alarme:
+    mrs r2, spsr @ precisa guardar o spsr do modo atual para nao perder na transicao depois da chamada de funcao
     stmfd sp!, {r0-r3}
+
+    msr CPSR_c, #LOCO_MODE @ o codigo de usuario deve ser executado no respectivo modo
 
     ldr r1, [r3]        @ carrega o endereco da funcao a ser chamada
     blx r1              @ invoca a funcao
     
-    @ esvazia essa posicao do vetor
+    @ trap para voltar ao modo anterior (IRQ) a chamada da funcao
+    mov r7, #ID_INNER_BACK_TO_IRQ
+    svc 0x0
+
     ldmfd sp!, {r0-r3}
+    msr spsr, r2
+
+    @ esvazia essa posicao do vetor
     mov r0, #0
     str r0, [r3, #4]
 
