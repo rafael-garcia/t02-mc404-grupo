@@ -63,8 +63,8 @@ SETS:
   @ Definicao de valores para o CPSR para cada modo de operacao
             @7    6    5    4    [3:0]   
   @disabled IRQ   FIQ THUMB mode
-  .set USER_MODE,           0x1F @(1101 1111)
-  .set IRQ_MODE,            0x12 @(1101 0010)
+  .set USER_MODE,           0x1F @(0001 1111)
+  .set IRQ_MODE,            0x12 @(0001 0010)
   .set SUPERVISOR_MODE,     0x13 @(0001 0011)
   .set LOCO_MODE,           0x10 @(0001 0000)
 
