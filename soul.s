@@ -396,7 +396,7 @@ INNER_BACK_TO_IRQ:
   stmfd sp!, {lr}
   msr CPSR_c, #IRQ_MODE
   ldmfd sp!, {lr}
-  movs pc, lr
+  mov pc, lr
 
 IRQ_HANDLER: @ como no lab 08
   stmfd sp!, {r0-r12, lr}
