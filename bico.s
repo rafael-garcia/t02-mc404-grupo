@@ -6,7 +6,7 @@
 .globl read_sonars
 .globl get_time
 .globl set_time
-.globl set_alarm
+.globl add_alarm
 
 get_time:
         stmfd sp!, {r4-r11, lr} @ Salva regs
@@ -20,7 +20,7 @@ set_time:
         svc 0x0
         ldmfd sp!, {r4-r11, pc} @ Recupera regs (valor de lr diretamente em pc)
 
-set_alarm:
+add_alarm:
         stmfd sp!, {r4-r11, lr} @ Salva regs
         mov r7, #13
         svc 0x0

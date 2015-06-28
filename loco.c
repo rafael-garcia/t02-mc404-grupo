@@ -12,11 +12,21 @@ void _start(void) {
 	unsigned int actual_time = 0;
 	unsigned int speed = 0;
 	actual_time = get_time();
-	set_alarm(&anda, actual_time + 2);
-	set_alarm(&para, actual_time + 4);
-	set_alarm(&gira_direita, actual_time + 6);
-	set_alarm(&para, actual_time + 8);
-	set_alarm(&anda, actual_time + 10);
+	add_alarm(&anda, actual_time + 20000);
+	delay();
+	actual_time = get_time();
+	add_alarm(&para, actual_time + 40000);
+	delay();
+	actual_time = get_time();
+	add_alarm(&gira_direita, actual_time + 60000);
+	delay();
+	actual_time = get_time();
+	add_alarm(&para, actual_time + 80000);
+	delay();
+	actual_time = get_time();
+	add_alarm(&anda, actual_time + 100000);
+	delay();
+	actual_time = get_time();
 	while(1);
 }
 
@@ -38,8 +48,5 @@ void gira_esquerda(){
 
 /* Spend some time doing nothing. */
 void delay() {
-  int i;
-  /* Not the best way to delay */
-  for(i = 0; i < 900; i++ ){
-  }
+  read_sonar(0);
 }
