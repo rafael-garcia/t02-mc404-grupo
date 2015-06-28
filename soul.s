@@ -355,7 +355,8 @@ SET_ALARM:
   mov r4, r0
   mov r5, r1
   
-  bl GET_TIME
+  ldr r1, =CONTADOR_TEMPO
+  ldr r0, [r1]
   @mov r2, r0 @ guarda o tempo que foi buscado pela funcao GET_TIME
 
   cmp r0, r5
@@ -390,17 +391,6 @@ SET_ALARM:
   fim_set_alarm:
     ldmfd sp!, {r4-r5, lr}
     movs pc, lr
-
-@ funcao que faz LOOP_WAITING_VAL iteracoes para alcancar um delay desejavel de 10-15ms
-LOOP_WAITING:
-    mov r0, #0
-    ldr r1, =LOOP_WAITING_VAL
-
-    do:
-      add r0, r0, #1
-      cmp r0, r1
-      ble do
-    mov pc, lr
 
 INNER_BACK_TO_IRQ:
   stmfd sp!, {lr}
@@ -469,6 +459,17 @@ IRQ_HANDLER: @ como no lab 08
 
 DEFAULT_HANDLER:
   movs pc, lr
+
+@ funcao que faz LOOP_WAITING_VAL iteracoes para alcancar um delay desejavel de 10-15ms
+LOOP_WAITING:
+    mov r0, #0
+    ldr r1, =LOOP_WAITING_VAL
+
+    do:
+      add r0, r0, #1
+      cmp r0, r1
+      ble do
+    mov pc, lr
 
 .data
   CONTADOR_ALARM: .word 0
