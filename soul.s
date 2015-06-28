@@ -86,8 +86,18 @@ _start:
 @ Configura o vetor de interrupcoes
 interrupt_vector:
   b RESET_HANDLER
+.org 0x04
+  b DEFAULT_HANDLER
 .org 0x08
   b SVC_HANDLER
+.org 0x0C
+  b DEFAULT_HANDLER
+.org 0x10
+  b DEFAULT_HANDLER
+.org 0x18
+  b IRQ_HANDLER
+.org 0x1C
+  b DEFAULT_HANDLER
 
 @ Inicio do codigo do usuario
 .org 0x100
@@ -398,7 +408,7 @@ INNER_BACK_TO_IRQ:
   movs pc, lr
 
 IRQ_HANDLER: @ como no lab 08
-  stmfd sp!, {r4-r11, lr}
+  stmfd sp!, {r0-r12, lr}
   
   @ informa que o processador esta ciente da interrupcao
   ldr r3, =GPT_SR
@@ -452,13 +462,14 @@ IRQ_HANDLER: @ como no lab 08
     str r0, [r1]
 
   fim_irq_handler:
-    ldmfd sp!, {r4-r11, lr}
+    ldmfd sp!, {r0-r12, lr}
     sub lr, lr, #4           @ correcao do valor de lr = pc + 8
     movs pc, lr
 
 DEFAULT_HANDLER:
+  movs pc, lr
 
 .data
-  CONTADOR_TEMPO: .word 0
   CONTADOR_ALARM: .word 0
+  CONTADOR_TEMPO: .word 0
   VETOR_ALARM:    .space MAX_ALARMS_ARRAY_SIZE

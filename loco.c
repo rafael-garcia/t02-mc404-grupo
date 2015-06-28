@@ -6,9 +6,9 @@ void segue_parede();
 
 void _start(void) {
 	busca_parede();
-	// while (1) {
+	while (1) {
 		segue_parede();
-	// }
+	}
 }
 
 /**
