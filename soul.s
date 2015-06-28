@@ -393,9 +393,9 @@ SET_ALARM:
     movs pc, lr
 
 INNER_BACK_TO_IRQ:
-  stmfd sp!, {lr}
+  mov r0, lr
   msr CPSR_c, #IRQ_MODE
-  ldmfd sp!, {lr}
+  mov lr, r0
   mov pc, lr
 
 IRQ_HANDLER: @ como no lab 08
