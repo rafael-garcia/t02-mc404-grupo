@@ -10,32 +10,6 @@
 .org 0x0
 .section .iv, "a"
 
-_start:     
-
-@ Configura o vetor de interrupcoes
-interrupt_vector:
-
-  b RESET_HANDLER
-
-.org 0x04
-  b DEFAULT_HANDLER
-
-.org 0x08
-  b SVC_HANDLER
-
-.org 0x0C
-  b DEFAULT_HANDLER
-
-.org 0x10
-  b DEFAULT_HANDLER
-
-.org 0x18
-  b IRQ_HANDLER
-
-.org 0x1C
-  b DEFAULT_HANDLER
-
-@ Inicio do codigo do usuario
 SETS:
   .set LOCO_CODE,                  0x77802000
 
@@ -107,6 +81,32 @@ SETS:
   @ Configura valor de iteracoes para aguardar algo entre 10-15 ms
   .set LOOP_WAITING_VAL,  15000
 
+_start:     
+
+@ Configura o vetor de interrupcoes
+interrupt_vector:
+
+  b RESET_HANDLER
+
+.org 0x04
+  b DEFAULT_HANDLER
+
+.org 0x08
+  b SVC_HANDLER
+
+.org 0x0C
+  b DEFAULT_HANDLER
+
+.org 0x10
+  b DEFAULT_HANDLER
+
+.org 0x18
+  b IRQ_HANDLER
+
+.org 0x1C
+  b DEFAULT_HANDLER
+
+@ Inicio do codigo do usuario
 .org 0x100
 @ Zera o contador de tempo
   ldr r2, =CONTADOR_TEMPO
