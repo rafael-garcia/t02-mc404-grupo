@@ -1,13 +1,28 @@
 #include "api_robot2.h"
 
 void delay();
+void anda_devagar();
 void busca_parede();
 void segue_parede();
 
+int i = 0;
+
 void _start(void) {
-	busca_parede();
-	while (1) {
-		segue_parede();
+	unsigned int tempo = get_time();
+	
+	set_motors_speed(15,15);
+	
+	for (; i < 50; i++) {
+		tempo = tempo + 2;
+		set_alarm(&anda_devagar, tempo);
+	}
+}
+
+void anda_devagar() {
+	if (i % 2 == 0) {
+		set_motors_speed(5,0);
+	} else {
+		set_motors_speed(0,0);
 	}
 }
 
