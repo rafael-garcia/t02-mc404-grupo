@@ -6,8 +6,9 @@
 @Mudar para nivel usuario
 @Chamar codigo de controle
 
+.text
 .org 0x0
-.section .iv,"a"
+.section .iv, "a"
 
 _start:     
 
@@ -41,10 +42,9 @@ SETS:
   .set DATA_BASE_ADDR, 0x77801900 @ Parte da memoria destinada aos dados (definido no Makefile do projeto)
 
   @Configuracao de pilhas - cada uma tem 0x800 enderecos = 2KB
-  .set USER_STACK,       0x77802100
-  .set SUPERVISOR_STACK, 0x77802900
-  .set IRQ_STACK,        0x77803100
-  .set LOCO_STACK,       0x77803900
+  .set IRQ_STACK,        0x7FFFFFFF@0x7FFFFFFF
+  .set SUPERVISOR_STACK, 0x7A802000@0x7DFFFFFF
+  .set LOCO_STACK,       0x78802000@0x7BFFFFFF
 
   @ Configura enderecos dos registradores do GPIO (entradas e saidas)
   .set GPIO_DR,           0x53F84000     @Data Register
@@ -89,8 +89,8 @@ SETS:
   @ Definicao de valores para o CPSR para cada modo de operacao
             @7    6    5    4    [3:0]   
   @disabled IRQ   FIQ THUMB mode
-  .set USER_MODE,           0xDF @(1101 1111)
-  .set IRQ_MODE,            0xD2 @(1101 0010)
+  .set USER_MODE,           0x1F @(1101 1111)
+  .set IRQ_MODE,            0x12 @(1101 0010)
   .set SUPERVISOR_MODE,     0x13 @(0001 0011)
   .set LOCO_MODE,           0x10 @(0001 0000)
 
@@ -108,8 +108,6 @@ SETS:
   .set LOOP_WAITING_VAL,  15000
 
 .org 0x100
-.text
-.align 4
 @ Zera o contador de tempo
   ldr r2, =CONTADOR_TEMPO
   mov r0, #0
@@ -126,17 +124,17 @@ RESET_HANDLER:
 SET_STACKS:
 
   @instrucao msr - habilita interrupcoes
-  msr CPSR_c, #USER_MODE       @ SYSTEM mode, IRQ/FIQ disabled
-  ldr sp, =USER_STACK
-
-  msr CPSR_c, #IRQ_MODE       @ IRQ mode, IRQ/FIQ disabled
-  ldr sp, =IRQ_STACK
-
+  
   msr CPSR_c, #SUPERVISOR_MODE       @ SUPERVISOR mode, IRQ/FIQ enabled
   ldr sp, =SUPERVISOR_STACK
 
+  msr CPSR_c, #IRQ_MODE       @ IRQ mode, IRQ/FIQ disabled
+  ldr sp, =IRQ_STACK
+  
   msr CPSR_c, #LOCO_MODE       @ USER mode, IRQ/FIQ enabled
   ldr sp, =LOCO_STACK
+
+  msr CPSR_c, #SUPERVISOR_MODE
 
 @ enderecos encontrados no datasheet IMX53-gpt.pdf na pagina do lab08 (tabela da pag 06)
 SET_GPT:     
