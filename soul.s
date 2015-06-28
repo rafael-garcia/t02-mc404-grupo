@@ -351,13 +351,14 @@ SET_TIME:
   movs pc, lr
 
 SET_ALARM:
-  stmfd sp!, {r0-r1, lr}
+  stmfd sp!, {r4-r5, lr}
+  mov r4, r0
+  mov r5, r1
   
   bl GET_TIME
-  mov r2, r0 @ guarda o tempo que foi buscado pela funcao GET_TIME
-  ldmfd sp!, {r0-r1}
+  @mov r2, r0 @ guarda o tempo que foi buscado pela funcao GET_TIME
 
-  cmp r1, r2
+  cmp r0, r5
   movge r0, #-2
   bhs fim_set_alarm
 
@@ -383,11 +384,11 @@ SET_ALARM:
     b percorre_vetor_alarm
 
   guarda_alarm:
-    str r0, [r2]      @ guarda o endereco do ponteiro da funcao
-    str r1, [r2, #4]  @ guarda o tempo em que o alarme deve ser acionado
+    str r4, [r2]      @ guarda o endereco do ponteiro da funcao
+    str r5, [r2, #4]  @ guarda o tempo em que o alarme deve ser acionado
 
   fim_set_alarm:
-    ldmfd sp!, {lr}
+    ldmfd sp!, {r4-r5, lr}
     movs pc, lr
 
 @ funcao que faz LOOP_WAITING_VAL iteracoes para alcancar um delay desejavel de 10-15ms
