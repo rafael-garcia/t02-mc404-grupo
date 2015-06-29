@@ -1,3 +1,16 @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@
+@ Descricao: camada BICo, a biblioteca de controle do robo UoLi.
+@   Aqui estao as implementacoes de funcoes definidas pela API de controle 
+@   'api_robot2.h'.
+@   Essas funcoes serao expostas para a camada LoCo que podera se comunicar com 
+@   diversos perifericos do robo para que possa executar a logica do programa.
+@
+@ Autores: Rafael Matheus Garcia RA 121295
+@          Thiago Lugli          RA 157413
+@ 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 .text
 .align 4
 .globl set_motor_speed

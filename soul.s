@@ -1,11 +1,21 @@
-@ padroes adotados:
-@   - funcoes: palavras separadas por underscore
-@   - funcoes internas: lower case
-@   - syscalls, funcoes de inicializacao e valores fixos: upper case
-
-@Mudar para nivel usuario
-@Chamar codigo de controle
-
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@
+@ Descricao: camada SOUL, o sistema operacional do robo UoLi.
+@   Aqui estao as implementacoes de syscalls conforme definidas anteriormente no
+@     enunciado do trabalho. Essas syscalls serao expostas para a API a fim de 
+@     permitir o uso de funcoes do UoLi que dependem de seus perifericos, como 
+@     ler valores de seus sonares, definir velocidades de motores e lidar com o 
+@     tempo do sistema (pegar, definir e agendar)
+@
+@ Autores: Rafael Matheus Garcia RA 121295
+@          Thiago Lugli          RA 157413
+@ 
+@ Padroes adotados:
+@   - Funcoes: palavras separadas por underscore
+@   - Funcoes internas: lower case
+@   - Syscalls, funcoes de inicializacao e valores fixos: upper case
+@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 .text
 .org 0x0
 .section .iv, "a"
@@ -454,7 +464,7 @@ IRQ_HANDLER: @ como no lab 08
 
     ldr r1, [r3]        @ carrega o endereco da funcao a ser chamada
     blx r1              @ invoca a funcao
-    
+
     @ trap para voltar ao modo anterior (IRQ) a chamada da funcao
     mov r7, #ID_INNER_BACK_TO_IRQ
     svc 0x0
