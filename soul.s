@@ -64,7 +64,7 @@ SETS:
             @7    6    5    4    [3:0]   
   @disabled IRQ   FIQ THUMB mode
   .set USER_MODE,           0x1F @(0001 1111)
-  .set IRQ_MODE,            0x12 @(0001 0010)
+  .set IRQ_MODE,            0xD2 @(1101 0010)
   .set SUPERVISOR_MODE,     0x13 @(0001 0011)
   .set LOCO_MODE,           0x10 @(0001 0000)
 
@@ -419,7 +419,10 @@ IRQ_HANDLER: @ como no lab 08
   percorre_vetor_alarm_disparo:
     ldr r1, [r3, #4]         @ a struct eh: endereco da funcao, tempo do alarme
     cmp r1, r2               @ compara o tempo atual com o tempo do alarme do elemento do vetor
-    beq dispara_alarme
+    stmfd sp!, {r0-r3}
+
+    blls dispara_alarme
+    ldmfd sp!, {r0-r3}
 
     add r3, r3, #8           @ incrementa o indice para avancar no vetor de alarmes
     add r0, r0, #1
@@ -428,7 +431,23 @@ IRQ_HANDLER: @ como no lab 08
     b percorre_vetor_alarm_disparo
 
   dispara_alarme:
+    cmp r1, #0
+    moveq pc, lr
+
+    stmfd sp!, {lr}
+
     mrs r2, spsr @ precisa guardar o spsr do modo atual para nao perder na transicao depois da chamada de funcao
+    
+    @ esvazia essa posicao do vetor
+    mov r0, #0
+    str r0, [r3, #4]
+
+    @ diminui contador de alarmes
+    ldr r1, =CONTADOR_ALARM
+    ldr r0, [r1]
+    sub r0, r0, #1
+    str r0, [r1]
+
     stmfd sp!, {r0-r3}
 
     msr CPSR_c, #LOCO_MODE @ o codigo de usuario deve ser executado no respectivo modo
@@ -442,16 +461,8 @@ IRQ_HANDLER: @ como no lab 08
 
     ldmfd sp!, {r0-r3}
     msr spsr, r2
-
-    @ esvazia essa posicao do vetor
-    mov r0, #0
-    str r0, [r3, #4]
-
-    @ diminui contador de alarmes
-    ldr r1, =MAX_ALARMS
-    ldr r0, [r1]
-    sub r0, r0, #1
-    str r0, [r1]
+    ldmfd sp!, {lr}
+    mov pc, lr
 
   fim_irq_handler:
     ldmfd sp!, {r0-r12, lr}
