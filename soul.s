@@ -77,7 +77,7 @@ SETS: @ conjunto de definicoes de constantes para usarmos no resto do codigo
   .set LOCO_MODE,             0x10 @(0001 0000)
 
   @ Define frequencia para fazer a contagem (system time)
-  .set TIME_SZ,               64
+  .set TIME_SZ,               16
 
   .set MAX_ALARMS,            10
   .set MAX_ALARMS_ARRAY_SIZE, 20 @ tem que ser o dobro da variavel anterior porque
