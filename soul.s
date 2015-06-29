@@ -387,7 +387,7 @@ SET_ALARM:
   @@@ NAO pode entrar aqui com o vetor cheio @@@
   ldr r2, =VETOR_ALARM @ carrega o endereco de memoria do vetor
   percorre_vetor_alarm:
-    ldr r3, [r2]         @ carrega o valor da posicao atual do vetor
+    ldr r3, [r2, #4]         @ carrega o valor da posicao atual do vetor
     cmp r3, #0 @ as posicoes sao iniciadas com 0, entao 0 = posicao vazia
     
     beq guarda_alarm @ ja encontrou uma posicao disponivel no vetor
