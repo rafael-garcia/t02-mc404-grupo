@@ -409,7 +409,7 @@ INNER_BACK_TO_IRQ:
   mov pc, lr
 
 IRQ_HANDLER: @ como no lab 08
-  ldr sp, =IRQ_STACK
+  @ldr sp, =IRQ_STACK
   stmfd sp!, {r0-r12, lr}
   
   @ informa que o processador esta ciente da interrupcao
