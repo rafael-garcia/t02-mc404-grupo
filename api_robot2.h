@@ -16,12 +16,12 @@
 /* 
  * Sets motor speed. 
  * Parameters: 
- *   speed: the motor speed (Only the last 6 bits are used)
  *   id: the motor id (0 for left motor, 1 for right motor)
+ *   speed: the motor speed (Only the last 6 bits are used)
  * Returns:
  *   void
  */
-void set_motor_speed(unsigned char speed, unsigned char id);
+void set_motor_speed(unsigned char id, unsigned char speed);
 
 /* 
  * Sets both motors speed. 
