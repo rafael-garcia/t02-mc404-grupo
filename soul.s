@@ -387,7 +387,7 @@ SET_ALARM:
   @mov r2, r0 @ guarda o tempo que foi buscado pela funcao GET_TIME
 
   cmp r0, r5
-  movge r0, #-2
+  movhs r0, #-2
   bhs fim_set_alarm
 
   ldr r2, =CONTADOR_ALARM
