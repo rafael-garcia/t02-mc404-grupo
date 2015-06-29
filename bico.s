@@ -24,6 +24,7 @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @
 @ Funcao que acessa o contador de tempo do sistema e retorna seu valor.
+@
 @ Parametros:
 @       nenhum
 @ Retorno:
@@ -39,6 +40,7 @@ get_time:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @
 @ Funcao que seta um valor para o contador de tempo do sistema.
+@
 @ Parametros:
 @       r0: o tempo que se deseja inserir no sistema
 @ Retorno:
@@ -60,6 +62,7 @@ add_alarm:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @
 @ Funcao que seta uma velocidade para o motor com o id especificado.
+@
 @ Parametros:
 @       r0: a velocidade do motor (so os 6 LSB sao usados)
 @       r1: o id do motor (0 = motor da esquerda, 1 = motor da direita)
@@ -76,6 +79,7 @@ set_motor_speed:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @
 @ Funcao que seta uma velocidade para cada um dos motores do robo.
+@
 @ Parametros:
 @       r0: a velocidade do motor da esquerda (so os 6 LSB sao usados)
 @       r1: a velocidade do motor da direita (so os 6 LSB sao usados)
@@ -92,6 +96,7 @@ set_motors_speed:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @
 @ Funcao que le o valor de um dos sonares.
+@
 @ Parametros:
 @       r0: o id do sonar que se deseja ler (de 0 a 15)
 @ Retorno:
@@ -107,6 +112,7 @@ read_sonar:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ *** NAO SERA USADA NO TRABALHO *** 
 @ Funcao que le o valor de todos os sonares.
+@
 @ Parametros:
 @       r0: o endereco do comeco do array de distancia dos sonares (16 posicoes)
 @ Retorno:

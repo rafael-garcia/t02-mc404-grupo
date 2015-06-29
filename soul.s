@@ -20,22 +20,20 @@
 .org 0x0
 .section .iv, "a"
 
-SETS:
-  .set LOCO_CODE,                  0x77802000
+SETS: @ conjunto de definicoes de constantes para usarmos no resto do codigo
+  .set LOCO_CODE,        0x77802000 @ parte de memoria destinada ao LoCo (definido no Makefile do projeto)
 
-  .set DATA_BASE_ADDR, 0x77801900 @ Parte da memoria destinada aos dados (definido no Makefile do projeto)
-
-  @Configuracao de pilhas - cada uma tem 0x800 enderecos = 2KB
+  @Enderecos das pilhas - cada uma tem 0x800 enderecos = 2KB
   .set IRQ_STACK,        0x7FFFFFFF@0x7FFFFFFF
   .set SUPERVISOR_STACK, 0x7A802000@0x7DFFFFFF
   .set LOCO_STACK,       0x78802000@0x7BFFFFFF
 
-  @ Configura enderecos dos registradores do GPIO (entradas e saidas)
-  .set GPIO_DR,           0x53F84000     @Data Register
-  .set GPIO_GDIR,         0x53F84004     @Direction Register (n-bit = 0 -> entrada, n-bit = 1 -> saida)
-  .set GPIO_PSR,          0x53F84008     @Pad status register - apenas para leitura
+  @ Enderecos dos registradores do GPIO (entradas e saidas)
+  .set GPIO_DR,          0x53F84000     @Data Register
+  .set GPIO_GDIR,        0x53F84004     @Direction Register (n-bit = 0 -> entrada, n-bit = 1 -> saida)
+  .set GPIO_PSR,         0x53F84008     @Pad status register - apenas para leitura
 
-  @ Configuracao de mascaras para o GPIO
+  @ Mascaras para o GPIO para alterar/ler valores do motor e sonar
   .set MASK_GDIR,                   0b11111111111111000000000000111110 @ 1 = saida, 0 = entrada
 
   .set MASK_MOTOR_0_WRITE,          0b11111110000000111111111111111111
@@ -46,7 +44,7 @@ SETS:
   .set MASK_FLAG_READ,              0b00000000000000000000000000000001
   .set MASK_SONAR_DATA,             0b00000000000000111111111111000000
 
-  @ Configura enderecos TZIC
+  @ Enderecos do TZIC
   .set TZIC_BASE,        0x0FFFC000
   .set TZIC_INTCTRL,     0x0
   .set TZIC_INTSEC1,     0x84 
@@ -54,41 +52,41 @@ SETS:
   .set TZIC_PRIOMASK,    0xC
   .set TZIC_PRIORITY9,   0x424
 
-  @ Configura enderecos GPT
+  @ Enderecos do GPT
   .set GPT_CR,           0x53FA0000
   .set GPT_PR,           0x53FA0004
   .set GPT_SR,           0x53FA0008
   .set GPT_OCR1,         0x53FA0010
   .set GPT_IR,           0x53FA000C
 
-  @ Configura valores das syscalls
-  .set ID_INNER_BACK_TO_IRQ, 7
-  .set ID_READ_SONAR,        8
-  .set ID_SET_MOTOR_SPEED,   9
-  .set ID_SET_MOTORS_SPEED,  10
-  .set ID_GET_TIME,          11
-  .set ID_SET_TIME,          12
-  .set ID_SET_ALARM,         13
+  @ Define valores das syscalls
+  .set ID_INNER_BACK_TO_IRQ,   7
+  .set ID_READ_SONAR,          8
+  .set ID_SET_MOTOR_SPEED,     9
+  .set ID_SET_MOTORS_SPEED,   10
+  .set ID_GET_TIME,           11
+  .set ID_SET_TIME,           12
+  .set ID_SET_ALARM,          13
 
   @ Definicao de valores para o CPSR para cada modo de operacao
             @7    6    5    4    [3:0]   
   @disabled IRQ   FIQ THUMB mode
-  .set USER_MODE,           0x1F @(0001 1111)
-  .set IRQ_MODE,            0xD2 @(1101 0010)
-  .set SUPERVISOR_MODE,     0x13 @(0001 0011)
-  .set LOCO_MODE,           0x10 @(0001 0000)
+  .set USER_MODE,             0x1F @(0001 1111)
+  .set IRQ_MODE,              0xD2 @(1101 0010)
+  .set SUPERVISOR_MODE,       0x13 @(0001 0011)
+  .set LOCO_MODE,             0x10 @(0001 0000)
 
-  @ Configura frequencia para fazer a contagem (system time)
-  .set TIME_SZ,          64
+  @ Define frequencia para fazer a contagem (system time)
+  .set TIME_SZ,               64
 
-  .set MAX_ALARMS,        10
+  .set MAX_ALARMS,            10
   .set MAX_ALARMS_ARRAY_SIZE, 20 @ tem que ser o dobro da variavel anterior porque
-                  @ o vetor de alarmes precisa de 2 bytes para cada elemento
+                                 @ o vetor de alarmes precisa de 2 bytes para cada elemento
 
-  @ Configura valor maximo de velocidade (sao 6 bits = 0b111111 = #63)
-  .set MAX_SPEED_MOTOR,   63
+  @ Valor maximo de velocidade (sao 6 bits = 0b111111 = #63)
+  .set MAX_SPEED_MOTOR,       63
 
-  @ Configura valor de iteracoes para aguardar algo entre 10-15 ms
+  @ Define valor de iteracoes para aguardar algo entre 10-15 ms
   .set LOOP_WAITING_VAL,  15000
 
 _start:     
@@ -111,52 +109,53 @@ interrupt_vector:
 
 @ Inicio do codigo do usuario
 .org 0x100
-@ Zera o contador de tempo
+@ Zera o contador de tempo (system time)
   ldr r2, =CONTADOR_TEMPO
   mov r0, #0
   str r0, [r2]
-
+@ Zera o contador de alarmes
   ldr r2, =CONTADOR_ALARM
   str r0, [r2] 
 
 RESET_HANDLER:
-  @Set interrupt table base address on coprocessor 15.
+  @ Set interrupt table base address on coprocessor 15.
   ldr r0, =interrupt_vector
   mcr p15, 0, r0, c12, c0, 0
 
-SET_STACKS:
-
-  @instrucao msr - habilita interrupcoes
-  
-  msr CPSR_c, #SUPERVISOR_MODE       @ SUPERVISOR mode, IRQ/FIQ enabled
+@ Configura os modos de supervisor, IRQ e de usuario (codigo do LoCo)
+@   e suas respectivas pilhas.
+SET_STACKS:  
+  msr CPSR_c, #SUPERVISOR_MODE   @ SUPERVISOR mode, IRQ/FIQ enabled
   ldr sp, =SUPERVISOR_STACK
 
-  msr CPSR_c, #IRQ_MODE       @ IRQ mode, IRQ/FIQ disabled
+  msr CPSR_c, #IRQ_MODE          @ IRQ mode, IRQ/FIQ disabled
   ldr sp, =IRQ_STACK
   
-  msr CPSR_c, #LOCO_MODE       @ USER mode, IRQ/FIQ enabled
+  msr CPSR_c, #LOCO_MODE         @ USER mode, IRQ/FIQ enabled
   ldr sp, =LOCO_STACK
 
-  msr CPSR_c, #SUPERVISOR_MODE
+  msr CPSR_c, #SUPERVISOR_MODE   @ volta para o modo SUPERVISOR
 
-@ enderecos encontrados no datasheet IMX53-gpt.pdf na pagina do lab08 (tabela da pag 06)
-SET_GPT:     
+@ Configura o GPT (enderecos encontrados no datasheet IMX53-gpt.pdf na pagina 
+@   do lab08 (tabela da pag 06))
+SET_GPT:
   ldr r3, =GPT_CR
-  mov r4, #0x00000041         @ clock_src periferico
+  mov r4, #0x00000041            @ clock_src periferico
   str r4, [r3]
 
   ldr r3, =GPT_PR
-  mov r4, #0                  @ zera o prescaler
+  mov r4, #0                     @ zera o prescaler
   str r4, [r3]
 
   ldr r3, =GPT_OCR1
-  ldr r4, =TIME_SZ             @ conta ate a constante definida
+  ldr r4, =TIME_SZ               @ conta ate a constante definida
   str r4, [r3]
 
   ldr r3, =GPT_IR
-  mov r4, #1                  @ habilita interrupcao do tipo Output Compare Channel 1
+  mov r4, #1                     @ habilita interrupcao do tipo Output Compare Channel 1
   str r4, [r3]
 
+@ Configura o TZIC
 SET_TZIC:
   @ Liga o controlador de interrupcoes
   @ R1 <= TZIC_BASE
@@ -190,18 +189,22 @@ SET_TZIC:
   mov r0, #1
   str r0, [r1, #TZIC_INTCTRL]
 
-@ Configura o registrador GDIR do GPIO, para definir quais perifericos estarao em modo de entrada ou saida.
+@ Configura o registrador GDIR do GPIO, para definir quais perifericos estarao
+@   em modo de entrada ou saida.
 SET_GPIO:
   ldr r0, =GPIO_GDIR
   ldr r1, =MASK_GDIR
   str r1, [r0]
 
-  @Pula para o endereco inicial da camada LOCO
+@ Muda para o modo de usuario, carrega sua pilha e vai para o endereco de
+@   memoria correspondente a seu codigo (LoCo).
   msr CPSR_c, #LOCO_MODE       @ USER mode, IRQ/FIQ enabled
   ldr sp, =LOCO_STACK
   ldr r0, =LOCO_CODE
   bx r0
 
+@ Codigo responsavel para redirecionar as chamadas de syscalls dependendo do 
+@   valor de r7 passado
 SVC_HANDLER:
   cmp r7, #ID_INNER_BACK_TO_IRQ
   beq INNER_BACK_TO_IRQ
@@ -224,6 +227,20 @@ SVC_HANDLER:
   cmp r7, #ID_SET_ALARM
   beq SET_ALARM
 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@
+@ Syscall que le o valor de um dos sonares e o retorna.
+@ Essa syscall lida com o GPIO para poder fazer a leitura. Eh uma chamada mais 
+@   lenta devido as pausas necessarias para o circuito do sonar retornar sua 
+@   leitura.
+@  
+@ Parametros:
+@   r0: o id do sonar que se deseja ler (de 0 a 15)
+@ Retorno:
+@   -1 se o sonar passado como parametro esta dentro do intervalo valido [0-15]
+@   senao, a distancia como um inteiro, que varia de 0 ate (2^12)-1
+@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 READ_SONAR:
   stmfd sp!, {lr}
 
