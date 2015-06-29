@@ -38,10 +38,6 @@ add_alarm:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 set_motor_speed:
         stmfd sp!, {r4-r11, lr} @ Salva regs
-        mov r2, r0              @ Guarda a velocidade
-        mov r0, r1              @ inverte os parametros
-        mov r1, r2              @ (o .h esta especificado de um jeito e a syscall de outro)
-
         mov r7, #9              @ faz o syscall (write_motors)
         svc 0x0
         ldmfd sp!, {r4-r11, pc} @ Recupera regs (valor de lr diretamente em pc)
