@@ -403,8 +403,8 @@ SET_MOTORS_SPEED:
   lsl r0, r0, #19           @ Move o sexto bit ate o 24 bit (velocidade 0)
   lsl r1, r1, #26           @ Move o sexto bit ate o 32 bit (velocidade 1)
   
-  @orr r3, r0, #0           @ Combina a velocidade dos dois motores  
-  orr r3, r0, r1            @ Combina a velocidade dos dois motores
+  orr r3, r0, #0           @ Combina a velocidade dos dois motores  
+  orr r3, r3, r1            @ Combina a velocidade dos dois motores
   
   ldr r2, =GPIO_DR
   str r3, [r2]              @ Guarda o novo valor em GPIO_DR
