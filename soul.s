@@ -558,18 +558,20 @@ IRQ_HANDLER:
     cmp r1, r2               @ compara o tempo atual com o tempo do alarme do elemento do vetor
     stmfd sp!, {r0-r3}
 
-    blls dispara_alarme
-    ldmfd sp!, {r0-r3}
-
+    blls dispara_alarme      @ se o tempo for menor ou igual o atual, chamda dispara_alarme
+    ldmfd sp!, {r0-r3}       @ o caso 'menor' só ocorrerá quando houver dois alarme nos mesmo momento
+                             @ pois o set_alarm não possibilita insercao de alarmes com tempos menores que
+                             @ o tempo atual
     add r3, r3, #8           @ incrementa o indice para avancar no vetor de alarmes
     add r0, r0, #1
-    cmp r0, #MAX_ALARMS
-    beq fim_irq_handler
+    cmp r0, #MAX_ALARMS      @ comapara com o numero maximo de alarmes
+    beq fim_irq_handler      @ se for igual, chegou ao fim do vetor, nao ha mais alarmes
     b percorre_vetor_alarm_disparo
 
+  @ pega a funcao do vetor de alarme e chama ela em modo usuario
   dispara_alarme:
-    cmp r1, #0
-    moveq pc, lr
+    cmp r1, #0               @ caso o tempo setado seja 0, (ou seja, nao ha alarme), retorna
+    moveq pc, lr             @ e nao executa nada
 
     stmfd sp!, {lr}
 
@@ -596,16 +598,20 @@ IRQ_HANDLER:
     mov r7, #ID_INNER_BACK_TO_IRQ
     svc 0x0
 
+    @ retorna os valoeres dos registradores e volta spsr 
     ldmfd sp!, {r0-r3}
     msr spsr, r2
+    @ retorna de dispara_alarme
     ldmfd sp!, {lr}
     mov pc, lr
 
+  @ nao ha mais alarmes, recupera todos os registradores e volta para o codigo do usuario
   fim_irq_handler:
     ldmfd sp!, {r0-r12, lr}
     sub lr, lr, #4           @ correcao do valor de lr = pc + 8
     movs pc, lr
 
+@ Handler para interrupcoes nao definidas
 DEFAULT_HANDLER:
   movs pc, lr
 
@@ -621,6 +627,6 @@ LOOP_WAITING:
     mov pc, lr
 
 .data
-  CONTADOR_ALARM: .word 0
-  CONTADOR_TEMPO: .word 0
-  VETOR_ALARM:    .space MAX_ALARMS_ARRAY_SIZE
+  CONTADOR_ALARM: .word 0                         @ contador de alarmes ativos
+  CONTADOR_TEMPO: .word 0                         @ contador de tempo (incrementado a cada interrucao irq)
+  VETOR_ALARM:    .space MAX_ALARMS_ARRAY_SIZE    @ vetor de alarmes armazenados com seus tempos
